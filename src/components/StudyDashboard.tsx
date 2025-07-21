@@ -20,12 +20,6 @@ interface StudyDashboardProps {
   onMarkNotificationRead: (id: string) => void;
   onClearNotifications: () => void;
   onOpenSettings: () => void;
-  notifications: any[];
-  achievements: any[];
-  goals: any[];
-  onMarkNotificationRead: (id: string) => void;
-  onClearNotifications: () => void;
-  onOpenSettings: () => void;
 }
 
 export const StudyDashboard: React.FC<StudyDashboardProps> = ({
