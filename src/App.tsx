@@ -5,9 +5,11 @@ import { ModuleEntry } from './components/ModuleEntry';
 import { StudyDashboard } from './components/StudyDashboard';
 import { BreakScreen } from './components/BreakScreen';
 import { MoodTracker } from './components/MoodTracker';
+import { SettingsPanel } from './components/SettingsPanel';
 import { storage } from './utils/storage';
 import { generateDailySchedule } from './utils/scheduleGenerator';
-import { User, Module, StudySession, MoodEntry, AppState } from './utils/types';
+import { User, Module, StudySession, MoodEntry, AppState, Notification, Achievement, StudyGoal } from './utils/types';
+import { NotificationManager, GoalManager } from './utils/notifications';
 
 function App() {
   const [appState, setAppState] = useState<AppState>({
@@ -18,7 +20,11 @@ function App() {
     isOnBreak: false,
     breakTimeLeft: 0,
     moodEntries: [],
-    currentScreen: 'welcome'
+    currentScreen: 'welcome',
+    notifications: [],
+    achievements: [],
+    goals: [],
+    settings: {}
   });
 
   // Initialize app state from localStorage
@@ -26,15 +32,36 @@ function App() {
     const user = storage.getUser();
     const modules = storage.getModules();
     const moodEntries = storage.getMoodEntries();
+    const notifications = storage.getNotifications();
+    const achievements = storage.getAchievements();
+    const goals = storage.getGoals();
+    const settings = storage.getSettings();
     const today = new Date().toISOString().split('T')[0];
     const todaysSessions = storage.getSessions(today);
 
+    // Initialize default goals if none exist
+    let initialGoals = goals;
+    if (goals.length === 0 && user) {
+      initialGoals = GoalManager.createDefaultGoals();
+      storage.setGoals(initialGoals);
+    }
+
     if (user && modules.length > 0) {
+      // Update goal progress
+      const updatedGoals = GoalManager.updateGoalProgress(initialGoals, user, todaysSessions);
+      if (JSON.stringify(updatedGoals) !== JSON.stringify(initialGoals)) {
+        storage.setGoals(updatedGoals);
+      }
+
       setAppState(prev => ({
         ...prev,
         user,
         modules,
         moodEntries,
+        notifications,
+        achievements,
+        goals: updatedGoals,
+        settings,
         todaysSessions: todaysSessions.length > 0 ? todaysSessions : generateDailySchedule(modules),
         currentScreen: 'dashboard'
       }));
@@ -44,6 +71,10 @@ function App() {
         user,
         modules,
         moodEntries,
+        notifications,
+        achievements,
+        goals: initialGoals,
+        settings,
         currentScreen: 'modules'
       }));
     }
@@ -114,11 +145,41 @@ function App() {
     };
     storage.setUser(updatedUser);
 
+    // Check for new achievements
+    const newAchievements = NotificationManager.checkForAchievements(
+      updatedUser, 
+      updatedSessions, 
+      appState.moodEntries
+    );
+
+    if (newAchievements.length > 0) {
+      const updatedAchievements = [...appState.achievements, ...newAchievements];
+      storage.setAchievements(updatedAchievements);
+
+      // Create achievement notifications
+      const achievementNotifications = newAchievements.map(achievement =>
+        NotificationManager.createAchievementNotification(achievement)
+      );
+      const updatedNotifications = [...appState.notifications, ...achievementNotifications];
+      storage.setNotifications(updatedNotifications);
+
+      setAppState(prev => ({
+        ...prev,
+        achievements: updatedAchievements,
+        notifications: updatedNotifications
+      }));
+    }
+
+    // Update goals progress
+    const updatedGoals = GoalManager.updateGoalProgress(appState.goals, updatedUser, updatedSessions);
+    storage.setGoals(updatedGoals);
+
     setAppState(prev => ({
       ...prev,
       user: updatedUser,
       todaysSessions: updatedSessions,
-      currentSession: null
+      currentSession: null,
+      goals: updatedGoals
     }));
   };
 
@@ -144,6 +205,25 @@ function App() {
     }));
   };
 
+  const handleMarkNotificationRead = (notificationId: string) => {
+    const updatedNotifications = appState.notifications.map(n =>
+      n.id === notificationId ? { ...n, read: true } : n
+    );
+    storage.setNotifications(updatedNotifications);
+    setAppState(prev => ({ ...prev, notifications: updatedNotifications }));
+  };
+
+  const handleClearNotifications = () => {
+    const updatedNotifications = appState.notifications.map(n => ({ ...n, read: true }));
+    storage.setNotifications(updatedNotifications);
+    setAppState(prev => ({ ...prev, notifications: updatedNotifications }));
+  };
+
+  const handleUpdateSettings = (newSettings: any) => {
+    storage.setSettings(newSettings);
+    setAppState(prev => ({ ...prev, settings: newSettings }));
+  };
+
   const navigateToWelcome = () => {
     setAppState(prev => ({ ...prev, currentScreen: 'welcome' }));
   };
@@ -166,6 +246,10 @@ function App() {
 
   const navigateToDashboard = () => {
     setAppState(prev => ({ ...prev, currentScreen: 'dashboard' }));
+  };
+
+  const navigateToSettings = () => {
+    setAppState(prev => ({ ...prev, currentScreen: 'settings' }));
   };
 
   // Render current screen
@@ -210,6 +294,12 @@ function App() {
           onCompleteSession={handleCompleteSession}
           onEditModules={navigateToModules}
           onViewMood={navigateToMood}
+          notifications={appState.notifications}
+          achievements={appState.achievements}
+          goals={appState.goals}
+          onMarkNotificationRead={handleMarkNotificationRead}
+          onClearNotifications={handleClearNotifications}
+          onOpenSettings={navigateToSettings}
         />
       );
 
@@ -230,6 +320,15 @@ function App() {
           lastSession={appState.currentSession || undefined}
           modules={appState.modules}
           onAddMood={handleAddMood}
+          onBack={navigateToDashboard}
+        />
+      );
+
+    case 'settings':
+      return (
+        <SettingsPanel
+          settings={appState.settings}
+          onUpdateSettings={handleUpdateSettings}
           onBack={navigateToDashboard}
         />
       );

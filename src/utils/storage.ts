@@ -1,4 +1,4 @@
-import { User, Module, StudySession, MoodEntry } from './types';
+import { User, Module, StudySession, MoodEntry, Notification, Achievement, StudyGoal } from './types';
 
 export const storage = {
   getUser: (): User | null => {
@@ -35,6 +35,48 @@ export const storage = {
 
   setMoodEntries: (entries: MoodEntry[]): void => {
     localStorage.setItem('randstudy_moods', JSON.stringify(entries));
+  },
+
+  getNotifications: (): Notification[] => {
+    const notifications = localStorage.getItem('randstudy_notifications');
+    return notifications ? JSON.parse(notifications) : [];
+  },
+
+  setNotifications: (notifications: Notification[]): void => {
+    localStorage.setItem('randstudy_notifications', JSON.stringify(notifications));
+  },
+
+  getAchievements: (): Achievement[] => {
+    const achievements = localStorage.getItem('randstudy_achievements');
+    return achievements ? JSON.parse(achievements) : [];
+  },
+
+  setAchievements: (achievements: Achievement[]): void => {
+    localStorage.setItem('randstudy_achievements', JSON.stringify(achievements));
+  },
+
+  getGoals: (): StudyGoal[] => {
+    const goals = localStorage.getItem('randstudy_goals');
+    return goals ? JSON.parse(goals) : [];
+  },
+
+  setGoals: (goals: StudyGoal[]): void => {
+    localStorage.setItem('randstudy_goals', JSON.stringify(goals));
+  },
+
+  getSettings: (): any => {
+    const settings = localStorage.getItem('randstudy_settings');
+    return settings ? JSON.parse(settings) : {
+      notifications: true,
+      soundEnabled: true,
+      theme: 'light',
+      sessionReminders: true,
+      breakReminders: true
+    };
+  },
+
+  setSettings: (settings: any): void => {
+    localStorage.setItem('randstudy_settings', JSON.stringify(settings));
   },
 
   clearAll: (): void => {

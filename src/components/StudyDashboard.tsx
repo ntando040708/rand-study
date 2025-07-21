@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, SkipForward, TrendingUp, Clock, Calendar, Settings, Brain, Target, Lightbulb } from 'lucide-react';
+import { Play, Pause, SkipForward, TrendingUp, Clock, Calendar, Settings, Brain, Target, Lightbulb, Bell, Trophy } from 'lucide-react';
 import { StudySession, Module, User, MoodEntry, StudyInsight } from '../utils/types';
 import { StudyAnalytics } from '../utils/analytics';
+import { NotificationCenter } from './NotificationCenter';
+import { GoalsPanel } from './GoalsPanel';
 
 interface StudyDashboardProps {
   user: User;
@@ -12,6 +14,12 @@ interface StudyDashboardProps {
   onCompleteSession: (sessionId: string) => void;
   onEditModules: () => void;
   onViewMood: () => void;
+  notifications: any[];
+  achievements: any[];
+  goals: any[];
+  onMarkNotificationRead: (id: string) => void;
+  onClearNotifications: () => void;
+  onOpenSettings: () => void;
 }
 
 export const StudyDashboard: React.FC<StudyDashboardProps> = ({
@@ -23,12 +31,19 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
   onCompleteSession,
   onEditModules,
   onViewMood
+  notifications,
+  achievements,
+  goals,
+  onMarkNotificationRead,
+  onClearNotifications,
+  onOpenSettings
 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [sessionTime, setSessionTime] = useState(0);
   const [showInsights, setShowInsights] = useState(false);
   const [insights, setInsights] = useState<StudyInsight[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     const generatedInsights = StudyAnalytics.generateInsights(moodEntries, sessions, modules);
@@ -79,6 +94,8 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
     setActiveSession(null);
   };
 
+  const unreadNotifications = notifications.filter(n => !n.read).length;
+
   const completeCurrentSession = () => {
     if (currentSession) {
       onCompleteSession(currentSession.id);
@@ -126,6 +143,18 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
           </div>
           <div className="flex space-x-2">
             <button
+              onClick={() => setShowNotifications(true)}
+              className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
+              title="Notifications"
+            >
+              <Bell className="w-5 h-5" />
+              {unreadNotifications > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {unreadNotifications}
+                </span>
+              )}
+            </button>
+            <button
               onClick={onViewMood}
               className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
               title="Mood Tracker"
@@ -133,9 +162,9 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
               <TrendingUp className="w-5 h-5" />
             </button>
             <button
-              onClick={onEditModules}
+              onClick={onOpenSettings}
               className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
-              title="Edit Modules"
+              title="Settings"
             >
               <Settings className="w-5 h-5" />
             </button>
@@ -176,7 +205,7 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
@@ -225,6 +254,18 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
               </div>
               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
                 <Target className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Achievements</p>
+                <p className="text-2xl font-bold text-yellow-600">{achievements.length}</p>
+              </div>
+              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                <Trophy className="w-6 h-6 text-yellow-600" />
               </div>
             </div>
           </div>
@@ -311,6 +352,11 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
           </div>
         )}
 
+        {/* Goals Panel */}
+        <div className="mb-8">
+          <GoalsPanel goals={goals} />
+        </div>
+
         {/* Upcoming Sessions */}
         {upcomingSessions.length > 0 && (
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -357,6 +403,16 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
           </div>
         )}
       </div>
+
+      {/* Notification Center */}
+      <NotificationCenter
+        notifications={notifications}
+        achievements={achievements}
+        onMarkAsRead={onMarkNotificationRead}
+        onClearAll={onClearNotifications}
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
     </div>
   );
 };

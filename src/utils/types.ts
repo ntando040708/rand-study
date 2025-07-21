@@ -74,3 +74,34 @@ export interface StudyInsight {
   actionable: string;
   priority: 'low' | 'medium' | 'high';
 }
+
+export interface Notification {
+  id: string;
+  type: 'session' | 'break' | 'achievement' | 'reminder';
+  title: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+  actionUrl?: string;
+}
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  unlockedAt: string;
+  category: 'streak' | 'sessions' | 'mood' | 'time';
+}
+
+export interface StudyGoal {
+  id: string;
+  title: string;
+  description: string;
+  targetValue: number;
+  currentValue: number;
+  unit: string;
+  deadline: string;
+  completed: boolean;
+  moduleId?: string;
+}
