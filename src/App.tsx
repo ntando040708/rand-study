@@ -25,6 +25,10 @@ function App() {
     achievements: [],
     goals: [],
     settings: {}
+    notifications: [],
+    achievements: [],
+    goals: [],
+    settings: {}
   });
 
   // Initialize app state from localStorage

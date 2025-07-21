@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, SkipForward, TrendingUp, Clock, Calendar, Settings, Brain, Target, Lightbulb, Bell, Trophy } from 'lucide-react';
-import { StudySession, Module, User, MoodEntry, StudyInsight } from '../utils/types';
+import { StudySession, Module, User, MoodEntry, StudyInsight, Notification, Achievement, StudyGoal } from '../utils/types';
 import { StudyAnalytics } from '../utils/analytics';
+import { NotificationCenter } from './NotificationCenter';
+import { GoalsPanel } from './GoalsPanel';
 import { NotificationCenter } from './NotificationCenter';
 import { GoalsPanel } from './GoalsPanel';
 
@@ -14,6 +16,12 @@ interface StudyDashboardProps {
   onCompleteSession: (sessionId: string) => void;
   onEditModules: () => void;
   onViewMood: () => void;
+  notifications: Notification[];
+  achievements: Achievement[];
+  goals: StudyGoal[];
+  onMarkNotificationRead: (id: string) => void;
+  onClearNotifications: () => void;
+  onOpenSettings: () => void;
   notifications: any[];
   achievements: any[];
   goals: any[];
