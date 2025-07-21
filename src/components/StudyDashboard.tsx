@@ -30,7 +30,7 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
   onStartBreak,
   onCompleteSession,
   onEditModules,
-  onViewMood
+  onViewMood,
   notifications,
   achievements,
   goals,
