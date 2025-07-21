@@ -4,8 +4,6 @@ import { StudySession, Module, User, MoodEntry, StudyInsight, Notification, Achi
 import { StudyAnalytics } from '../utils/analytics';
 import { NotificationCenter } from './NotificationCenter';
 import { GoalsPanel } from './GoalsPanel';
-import { NotificationCenter } from './NotificationCenter';
-import { GoalsPanel } from './GoalsPanel';
 
 interface StudyDashboardProps {
   user: User;
