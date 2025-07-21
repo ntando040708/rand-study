@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { ArrowLeft, TrendingUp, Calendar, MessageCircle } from 'lucide-react';
-import { MoodEntry, StudySession } from '../utils/types';
+import { ArrowLeft, TrendingUp, Calendar, MessageCircle, BarChart3, BookOpen } from 'lucide-react';
+import { MoodEntry, StudySession, Module } from '../utils/types';
 import { MOOD_EMOJIS } from '../utils/constants';
+import { StudyAnalytics } from '../utils/analytics';
 
 interface MoodTrackerProps {
   moodEntries: MoodEntry[];
   lastSession?: StudySession;
+  modules: Module[];
   onAddMood: (mood: number, note: string) => void;
   onBack: () => void;
 }
@@ -13,12 +15,14 @@ interface MoodTrackerProps {
 export const MoodTracker: React.FC<MoodTrackerProps> = ({
   moodEntries,
   lastSession,
+  modules,
   onAddMood,
   onBack
 }) => {
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [viewMode, setViewMode] = useState<'add' | 'analytics'>('add');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,8 +47,13 @@ export const MoodTracker: React.FC<MoodTrackerProps> = ({
     return sum / moodEntries.length;
   };
 
+  const getModulePerformance = () => {
+    return StudyAnalytics.analyzeModulePerformance(moodEntries, modules);
+  };
+
   const recentMoods = getRecentMoods();
   const averageMood = getAverageMood();
+  const modulePerformance = getModulePerformance();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 p-6">
@@ -61,10 +70,33 @@ export const MoodTracker: React.FC<MoodTrackerProps> = ({
             <h1 className="text-2xl font-bold text-gray-900">Mood Tracker</h1>
             <p className="text-gray-600">How are you feeling about your studies?</p>
           </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setViewMode('add')}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                viewMode === 'add' 
+                  ? 'bg-purple-600 text-white' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              Add Mood
+            </button>
+            <button
+              onClick={() => setViewMode('analytics')}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                viewMode === 'analytics' 
+                  ? 'bg-purple-600 text-white' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              <BarChart3 className="w-4 h-4 mr-1 inline" />
+              Analytics
+            </button>
+          </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
@@ -95,10 +127,30 @@ export const MoodTracker: React.FC<MoodTrackerProps> = ({
               </div>
             </div>
           </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Best Module</p>
+                <p className="text-lg font-bold text-green-600">
+                  {modulePerformance.length > 0 
+                    ? modulePerformance.reduce((prev, current) => 
+                        current.avgMood > prev.avgMood ? current : prev
+                      ).moduleCode
+                    : 'N/A'
+                  }
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Add Mood Entry */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+        {viewMode === 'add' ? (
+          /* Add Mood Entry */
+          <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
           <h3 className="font-semibold text-gray-900 mb-6 text-center">
             How was your {lastSession ? 'study session' : 'day'}?
           </h3>
@@ -156,6 +208,33 @@ export const MoodTracker: React.FC<MoodTrackerProps> = ({
             </button>
           </form>
         </div>
+        ) : (
+          /* Analytics View */
+          <div className="space-y-6">
+            {/* Module Performance */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h3 className="font-semibold text-gray-900 mb-4">Module Performance</h3>
+              <div className="space-y-3">
+                {modulePerformance.map((module) => (
+                  <div key={module.moduleId} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                    <div>
+                      <h4 className="font-medium text-gray-900">{module.moduleCode}</h4>
+                      <p className="text-sm text-gray-600">{module.sessionCount} sessions</p>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-2xl mr-2">
+                        {MOOD_EMOJIS[Math.round(module.avgMood) - 1] || '😐'}
+                      </span>
+                      <span className="text-lg font-semibold text-purple-600">
+                        {module.avgMood.toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Recent Moods */}
         {recentMoods.length > 0 && (

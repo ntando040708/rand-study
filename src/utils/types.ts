@@ -39,6 +39,9 @@ export interface MoodEntry {
   note: string;
   sessionId: string;
   timestamp: string;
+  moduleId: string;
+  sessionDuration: number;
+  wasBreakTaken: boolean;
 }
 
 export interface AppState {
@@ -50,4 +53,24 @@ export interface AppState {
   breakTimeLeft: number;
   moodEntries: MoodEntry[];
   currentScreen: 'welcome' | 'auth' | 'modules' | 'dashboard' | 'break' | 'mood';
+  isLoginMode?: boolean;
+  studyStreak: number;
+  weeklyStats: WeeklyStats;
+  adaptiveScheduling: boolean;
+}
+
+export interface WeeklyStats {
+  totalStudyTime: number;
+  averageMood: number;
+  completedSessions: number;
+  favoriteModule: string;
+  bestStudyTime: string;
+}
+
+export interface StudyInsight {
+  type: 'mood' | 'productivity' | 'streak' | 'module';
+  title: string;
+  description: string;
+  actionable: string;
+  priority: 'low' | 'medium' | 'high';
 }

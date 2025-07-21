@@ -1,22 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { Coffee, ArrowRight, SkipForward, Play } from 'lucide-react';
-import { StudySession } from '../utils/types';
+import { Coffee, ArrowRight, SkipForward, Play, Brain, Heart } from 'lucide-react';
+import { StudySession, MoodEntry } from '../utils/types';
 import { BREAK_SUGGESTIONS } from '../utils/constants';
+import { StudyAnalytics } from '../utils/analytics';
 
 interface BreakScreenProps {
   session: StudySession;
+  moodEntries: MoodEntry[];
   onCompleteBreak: () => void;
   onSkipBreak: () => void;
 }
 
 export const BreakScreen: React.FC<BreakScreenProps> = ({
   session,
+  moodEntries,
   onCompleteBreak,
   onSkipBreak
 }) => {
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes default
+  const optimalBreakTime = StudyAnalytics.calculateOptimalBreakTime(moodEntries);
+  const [timeLeft, setTimeLeft] = useState(optimalBreakTime * 60);
   const [selectedSuggestion, setSelectedSuggestion] = useState(BREAK_SUGGESTIONS[0]);
   const [isActive, setIsActive] = useState(false);
+  const [motivationalTip, setMotivationalTip] = useState('');
+
+  useEffect(() => {
+    // Generate personalized motivational tip based on recent mood
+    const recentMoods = moodEntries.slice(-3);
+    const avgRecentMood = recentMoods.length > 0 
+      ? recentMoods.reduce((sum, entry) => sum + entry.mood, 0) / recentMoods.length 
+      : 3;
+
+    if (avgRecentMood < 2.5) {
+      setMotivationalTip("Remember: Every small step counts. You're building great study habits! 💪");
+    } else if (avgRecentMood > 4) {
+      setMotivationalTip("You're on fire! Keep up this amazing momentum! 🔥");
+    } else {
+      setMotivationalTip("You're doing great! This break will help you stay focused. 🌟");
+    }
+  }, [moodEntries]);
 
   useEffect(() => {
     setTimeLeft(selectedSuggestion.duration * 60);
@@ -74,6 +95,14 @@ export const BreakScreen: React.FC<BreakScreenProps> = ({
             <p className="text-gray-600">
               You've been studying hard. Let's recharge your mind.
             </p>
+            {motivationalTip && (
+              <div className="mt-4 p-3 bg-blue-50 rounded-xl border border-blue-200">
+                <div className="flex items-center">
+                  <Heart className="w-5 h-5 text-blue-600 mr-2" />
+                  <p className="text-sm text-blue-800">{motivationalTip}</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Timer */}
@@ -81,6 +110,9 @@ export const BreakScreen: React.FC<BreakScreenProps> = ({
             <div className="text-6xl font-mono font-bold text-orange-600 mb-4">
               {formatTime(timeLeft)}
             </div>
+            <p className="text-sm text-gray-500 mb-2">
+              Optimal break time: {optimalBreakTime} minutes
+            </p>
             {timeLeft === 0 && (
               <p className="text-green-600 font-semibold">Break complete! 🎉</p>
             )}

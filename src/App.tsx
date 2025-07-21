@@ -60,7 +60,7 @@ function App() {
 
   const handleModulesComplete = (modules: Module[]) => {
     storage.setModules(modules);
-    const sessions = generateDailySchedule(modules);
+    const sessions = generateDailySchedule(modules, appState.moodEntries, appState.todaysSessions);
     const today = new Date().toISOString().split('T')[0];
     storage.setSessions(today, sessions);
 
@@ -128,6 +128,9 @@ function App() {
       mood,
       note,
       sessionId: appState.currentSession?.id || '',
+      moduleId: appState.currentSession?.moduleId || '',
+      sessionDuration: appState.currentSession?.duration || 0,
+      wasBreakTaken: appState.isOnBreak,
       timestamp: new Date().toISOString()
     };
 
@@ -202,6 +205,7 @@ function App() {
           user={appState.user!}
           modules={appState.modules}
           sessions={appState.todaysSessions}
+          moodEntries={appState.moodEntries}
           onStartBreak={handleStartBreak}
           onCompleteSession={handleCompleteSession}
           onEditModules={navigateToModules}
@@ -213,6 +217,7 @@ function App() {
       return (
         <BreakScreen
           session={appState.currentSession!}
+          moodEntries={appState.moodEntries}
           onCompleteBreak={handleCompleteBreak}
           onSkipBreak={handleSkipBreak}
         />
@@ -223,6 +228,7 @@ function App() {
         <MoodTracker
           moodEntries={appState.moodEntries}
           lastSession={appState.currentSession || undefined}
+          modules={appState.modules}
           onAddMood={handleAddMood}
           onBack={navigateToDashboard}
         />

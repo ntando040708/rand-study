@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, SkipForward, TrendingUp, Clock, Calendar, Settings } from 'lucide-react';
-import { StudySession, Module, User } from '../utils/types';
+import { Play, Pause, SkipForward, TrendingUp, Clock, Calendar, Settings, Brain, Target, Lightbulb } from 'lucide-react';
+import { StudySession, Module, User, MoodEntry, StudyInsight } from '../utils/types';
+import { StudyAnalytics } from '../utils/analytics';
 
 interface StudyDashboardProps {
   user: User;
   modules: Module[];
   sessions: StudySession[];
+  moodEntries: MoodEntry[];
   onStartBreak: (session: StudySession) => void;
   onCompleteSession: (sessionId: string) => void;
   onEditModules: () => void;
@@ -16,6 +18,7 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
   user,
   modules,
   sessions,
+  moodEntries,
   onStartBreak,
   onCompleteSession,
   onEditModules,
@@ -24,6 +27,13 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [sessionTime, setSessionTime] = useState(0);
+  const [showInsights, setShowInsights] = useState(false);
+  const [insights, setInsights] = useState<StudyInsight[]>([]);
+
+  useEffect(() => {
+    const generatedInsights = StudyAnalytics.generateInsights(moodEntries, sessions, modules);
+    setInsights(generatedInsights);
+  }, [moodEntries, sessions, modules]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -55,6 +65,7 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
   const completedSessions = sessions.filter(s => s.completed).length;
   const totalSessions = sessions.length;
   const progressPercentage = totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0;
+  const weeklyStats = StudyAnalytics.getWeeklyStats(moodEntries, sessions, modules);
 
   const currentSession = sessions.find(s => !s.completed);
   const upcomingSessions = sessions.filter(s => !s.completed).slice(1, 4);
@@ -101,6 +112,17 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
                 day: 'numeric' 
               })}
             </p>
+            {insights.length > 0 && (
+              <div className="mt-2">
+                <button
+                  onClick={() => setShowInsights(!showInsights)}
+                  className="text-sm text-blue-600 hover:text-blue-700 flex items-center"
+                >
+                  <Brain className="w-4 h-4 mr-1" />
+                  {insights.length} AI Insights Available
+                </button>
+              </div>
+            )}
           </div>
           <div className="flex space-x-2">
             <button
@@ -120,8 +142,41 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
           </div>
         </div>
 
+        {/* AI Insights Panel */}
+        {showInsights && insights.length > 0 && (
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-8 border border-blue-100">
+            <div className="flex items-center mb-4">
+              <Brain className="w-6 h-6 text-blue-600 mr-2" />
+              <h3 className="font-semibold text-gray-900">AI Study Insights</h3>
+            </div>
+            <div className="space-y-3">
+              {insights.slice(0, 2).map((insight, index) => (
+                <div
+                  key={index}
+                  className={`p-4 rounded-xl border-l-4 ${
+                    insight.priority === 'high' 
+                      ? 'bg-red-50 border-red-400' 
+                      : insight.priority === 'medium'
+                      ? 'bg-yellow-50 border-yellow-400'
+                      : 'bg-green-50 border-green-400'
+                  }`}
+                >
+                  <div className="flex items-start">
+                    <Lightbulb className="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-1">{insight.title}</h4>
+                      <p className="text-sm text-gray-600 mb-2">{insight.description}</p>
+                      <p className="text-sm font-medium text-blue-700">{insight.actionable}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
@@ -151,11 +206,25 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Sessions</p>
-                <p className="text-2xl font-bold text-purple-600">{user.totalSessions}</p>
+                <p className="text-sm text-gray-600">Weekly Hours</p>
+                <p className="text-2xl font-bold text-purple-600">{Math.round(weeklyStats.totalStudyTime / 60)}h</p>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                 <Clock className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Avg Mood</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {weeklyStats.averageMood > 0 ? weeklyStats.averageMood.toFixed(1) : 'N/A'}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                <Target className="w-6 h-6 text-orange-600" />
               </div>
             </div>
           </div>
