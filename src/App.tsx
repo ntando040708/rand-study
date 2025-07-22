@@ -300,12 +300,6 @@ function App() {
           onMarkNotificationRead={handleMarkNotificationRead}
           onClearNotifications={handleClearNotifications}
           onOpenSettings={navigateToSettings}
-          notifications={appState.notifications}
-          achievements={appState.achievements}
-          goals={appState.goals}
-          onMarkNotificationRead={handleMarkNotificationRead}
-          onClearNotifications={handleClearNotifications}
-          onOpenSettings={navigateToSettings}
         />
       );
 
