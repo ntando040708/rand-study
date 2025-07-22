@@ -144,3 +144,4 @@ export const storage = {
     const keys = Object.keys(localStorage).filter(key => key.startsWith('randstudy_'));
     keys.forEach(key => localStorage.removeItem(key));
   }
+}

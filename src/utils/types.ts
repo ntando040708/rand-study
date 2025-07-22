@@ -108,3 +108,4 @@ export interface StudyGoal {
   deadline: string;
   completed: boolean;
   moduleId?: string;
+}
