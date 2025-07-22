@@ -144,7 +144,12 @@ export class StudyAnalytics {
       return acc;
     }, {} as Record<string, number>);
     
-    const bestTime = Object.entries(timeSlots).reduce((prev, current) => 
+    const timeEntries = Object.entries(timeSlots);
+    if (timeEntries.length === 0) {
+      return 'Morning';
+    }
+    
+    const bestTime = timeEntries.reduce((prev, current) => 
       current[1] > prev[1] ? current : prev
     );
     
