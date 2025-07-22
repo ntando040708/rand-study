@@ -64,23 +64,83 @@ export const storage = {
     localStorage.setItem('randstudy_goals', JSON.stringify(goals));
   },
 
-  getSettings: (): any => {
+  getSettings: (): AppSettings => {
     const settings = localStorage.getItem('randstudy_settings');
     return settings ? JSON.parse(settings) : {
       notifications: true,
       soundEnabled: true,
       theme: 'light',
       sessionReminders: true,
-      breakReminders: true
+      breakReminders: true,
+      defaultSessionLength: 30,
+      defaultBreakLength: 10,
+      pomodoroSettings: {
+        workDuration: 25,
+        shortBreakDuration: 5,
+        longBreakDuration: 15,
+        sessionsUntilLongBreak: 4,
+        autoStartBreaks: false,
+        autoStartSessions: false
+      },
+      studySounds: {
+        enabled: false,
+        type: 'white-noise',
+        volume: 50
+      },
+      wellness: {
+        eyeStrainReminders: true,
+        hydrationReminders: true,
+        postureReminders: true,
+        stressMonitoring: true,
+        sleepTracking: false
+      },
+      gamification: {
+        xpSystem: true,
+        streakChallenges: true,
+        leaderboards: false,
+        achievements: true
+      }
     };
   },
 
-  setSettings: (settings: any): void => {
+  setSettings: (settings: AppSettings): void => {
     localStorage.setItem('randstudy_settings', JSON.stringify(settings));
+  },
+
+  getStudyTechniques: (): StudyTechnique[] => {
+    const techniques = localStorage.getItem('randstudy_techniques');
+    return techniques ? JSON.parse(techniques) : [];
+  },
+
+  setStudyTechniques: (techniques: StudyTechnique[]): void => {
+    localStorage.setItem('randstudy_techniques', JSON.stringify(techniques));
+  },
+
+  getChallenges: (): Challenge[] => {
+    const challenges = localStorage.getItem('randstudy_challenges');
+    return challenges ? JSON.parse(challenges) : [];
+  },
+
+  setChallenges: (challenges: Challenge[]): void => {
+    localStorage.setItem('randstudy_challenges', JSON.stringify(challenges));
+  },
+
+  getWellnessData: (): WellnessData => {
+    const data = localStorage.getItem('randstudy_wellness');
+    return data ? JSON.parse(data) : {
+      stressLevel: 0,
+      hydrationReminders: 0,
+      eyeStrainBreaks: 0,
+      sleepHours: 8,
+      lastWellnessCheck: new Date().toISOString()
+    };
+  },
+
+  setWellnessData: (data: WellnessData): void => {
+    localStorage.setItem('randstudy_wellness', JSON.stringify(data));
   },
 
   clearAll: (): void => {
     const keys = Object.keys(localStorage).filter(key => key.startsWith('randstudy_'));
     keys.forEach(key => localStorage.removeItem(key));
   }
-};

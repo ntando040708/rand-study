@@ -52,11 +52,15 @@ export interface AppState {
   isOnBreak: boolean;
   breakTimeLeft: number;
   moodEntries: MoodEntry[];
-  currentScreen: 'welcome' | 'auth' | 'modules' | 'dashboard' | 'break' | 'mood';
+  currentScreen: 'welcome' | 'auth' | 'modules' | 'dashboard' | 'break' | 'mood' | 'settings' | 'analytics' | 'social' | 'wellness';
   isLoginMode?: boolean;
-  studyStreak: number;
-  weeklyStats: WeeklyStats;
-  adaptiveScheduling: boolean;
+  notifications: Notification[];
+  achievements: Achievement[];
+  goals: StudyGoal[];
+  settings: AppSettings;
+  studyTechniques: StudyTechnique[];
+  socialFeatures: SocialFeatures;
+  wellnessData: WellnessData;
 }
 
 export interface WeeklyStats {
@@ -104,4 +108,3 @@ export interface StudyGoal {
   deadline: string;
   completed: boolean;
   moduleId?: string;
-}
