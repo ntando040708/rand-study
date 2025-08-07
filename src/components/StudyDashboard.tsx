@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, SkipForward, TrendingUp, Clock, Calendar, Settings, Brain, Target, Lightbulb, Bell, Trophy } from 'lucide-react';
+import { Play, Pause, SkipForward, TrendingUp, Clock, Calendar, Settings, Brain, Target, Lightbulb, Bell, Trophy, CalendarDays } from 'lucide-react';
 import { StudySession, Module, User, MoodEntry, StudyInsight, Notification, Achievement, StudyGoal } from '../utils/types';
 import { StudyAnalytics } from '../utils/analytics';
 import { NotificationCenter } from './NotificationCenter';
@@ -20,6 +20,7 @@ interface StudyDashboardProps {
   onMarkNotificationRead: (id: string) => void;
   onClearNotifications: () => void;
   onOpenSettings: () => void;
+  onOpenCalendar: () => void;
 }
 
 export const StudyDashboard: React.FC<StudyDashboardProps> = ({
@@ -36,7 +37,8 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
   goals,
   onMarkNotificationRead,
   onClearNotifications,
-  onOpenSettings
+  onOpenSettings,
+  onOpenCalendar
 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeSession, setActiveSession] = useState<string | null>(null);
@@ -155,6 +157,13 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
               )}
             </button>
             <button
+             onClick={onOpenCalendar}
+             className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+             title="Calendar Sync"
+           >
+             <CalendarDays className="w-5 h-5" />
+           </button>
+           <button
               onClick={onViewMood}
               className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
               title="Mood Tracker"

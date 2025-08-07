@@ -53,11 +53,13 @@ export interface AppState {
   breakTimeLeft: number;
   moodEntries: MoodEntry[];
   currentScreen: 'welcome' | 'auth' | 'modules' | 'dashboard' | 'break' | 'mood' | 'settings' | 'analytics' | 'social' | 'wellness';
+  currentScreen: 'welcome' | 'auth' | 'modules' | 'dashboard' | 'break' | 'mood' | 'settings' | 'analytics' | 'social' | 'wellness' | 'calendar';
   isLoginMode?: boolean;
   notifications: Notification[];
   achievements: Achievement[];
   goals: StudyGoal[];
   settings: AppSettings;
+  calendarIntegrations: CalendarIntegration[];
   studyTechniques: StudyTechnique[];
   socialFeatures: SocialFeatures;
   wellnessData: WellnessData;
@@ -108,4 +110,58 @@ export interface StudyGoal {
   deadline: string;
   completed: boolean;
   moduleId?: string;
+}
+
+export interface ExternalIntegration {
+  id: string;
+  name: string;
+  type: 'calendar' | 'notes' | 'flashcards' | 'lms';
+  isConnected: boolean;
+  settings: any;
+}
+
+export interface CalendarIntegration {
+  id: string;
+  provider: 'google' | 'outlook' | 'apple' | 'ical';
+  name: string;
+  email: string;
+  isConnected: boolean;
+  accessToken?: string;
+  refreshToken?: string;
+  calendarId?: string;
+  syncEnabled: boolean;
+  lastSync: string;
+  syncSettings: CalendarSyncSettings;
+}
+
+export interface CalendarSyncSettings {
+  autoCreateEvents: boolean;
+  syncCompletedSessions: boolean;
+  includeBreaks: boolean;
+  eventPrefix: string;
+  reminderMinutes: number;
+  colorCoding: boolean;
+  conflictResolution: 'skip' | 'reschedule' | 'notify';
+}
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  description: string;
+  startTime: string;
+  endTime: string;
+  location?: string;
+  attendees?: string[];
+  reminders?: number[];
+  color?: string;
+  source: 'randstudy' | 'external';
+  studySessionId?: string;
+}
+
+export interface CalendarConflict {
+  id: string;
+  studySessionId: string;
+  conflictingEvent: CalendarEvent;
+  suggestedResolution: 'reschedule' | 'shorten' | 'skip';
+  alternativeSlots: string[];
 }

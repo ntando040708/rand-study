@@ -6,9 +6,10 @@ import { StudyDashboard } from './components/StudyDashboard';
 import { BreakScreen } from './components/BreakScreen';
 import { MoodTracker } from './components/MoodTracker';
 import { SettingsPanel } from './components/SettingsPanel';
+import { CalendarSyncPanel } from './components/CalendarSyncPanel';
 import { storage } from './utils/storage';
 import { generateDailySchedule } from './utils/scheduleGenerator';
-import { User, Module, StudySession, MoodEntry, AppState, Notification, Achievement, StudyGoal } from './utils/types';
+import { User, Module, StudySession, MoodEntry, AppState, Notification, Achievement, StudyGoal, CalendarIntegration } from './utils/types';
 import { NotificationManager, GoalManager } from './utils/notifications';
 
 function App() {
@@ -24,7 +25,8 @@ function App() {
     notifications: [],
     achievements: [],
     goals: [],
-    settings: {}
+    settings: {},
+    calendarIntegrations: []
   });
 
   // Initialize app state from localStorage
@@ -36,6 +38,7 @@ function App() {
     const achievements = storage.getAchievements();
     const goals = storage.getGoals();
     const settings = storage.getSettings();
+    const calendarIntegrations = storage.getCalendarIntegrations();
     const today = new Date().toISOString().split('T')[0];
     const todaysSessions = storage.getSessions(today);
 
@@ -62,6 +65,7 @@ function App() {
         achievements,
         goals: updatedGoals,
         settings,
+        calendarIntegrations,
         todaysSessions: todaysSessions.length > 0 ? todaysSessions : generateDailySchedule(modules),
         currentScreen: 'dashboard'
       }));
@@ -75,6 +79,7 @@ function App() {
         achievements,
         goals: initialGoals,
         settings,
+        calendarIntegrations,
         currentScreen: 'modules'
       }));
     }
@@ -224,6 +229,11 @@ function App() {
     setAppState(prev => ({ ...prev, settings: newSettings }));
   };
 
+  const handleUpdateCalendarIntegrations = (integrations: CalendarIntegration[]) => {
+    storage.setCalendarIntegrations(integrations);
+    setAppState(prev => ({ ...prev, calendarIntegrations: integrations }));
+  };
+
   const navigateToWelcome = () => {
     setAppState(prev => ({ ...prev, currentScreen: 'welcome' }));
   };
@@ -250,6 +260,10 @@ function App() {
 
   const navigateToSettings = () => {
     setAppState(prev => ({ ...prev, currentScreen: 'settings' }));
+  };
+
+  const navigateToCalendar = () => {
+    setAppState(prev => ({ ...prev, currentScreen: 'calendar' }));
   };
 
   // Render current screen
@@ -300,6 +314,7 @@ function App() {
           onMarkNotificationRead={handleMarkNotificationRead}
           onClearNotifications={handleClearNotifications}
           onOpenSettings={navigateToSettings}
+          onOpenCalendar={navigateToCalendar}
         />
       );
 
@@ -331,6 +346,33 @@ function App() {
           onUpdateSettings={handleUpdateSettings}
           onBack={navigateToDashboard}
         />
+      );
+
+    case 'calendar':
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 p-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center mb-8">
+              <button
+                onClick={navigateToDashboard}
+                className="mr-4 p-2 text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Calendar Integration</h1>
+                <p className="text-gray-600">Sync your study sessions with your calendar</p>
+              </div>
+            </div>
+            
+            <CalendarSyncPanel
+              integrations={appState.calendarIntegrations}
+              sessions={appState.todaysSessions}
+              modules={appState.modules}
+              onUpdateIntegrations={handleUpdateCalendarIntegrations}
+            />
+          </div>
+        </div>
       );
 
     default:

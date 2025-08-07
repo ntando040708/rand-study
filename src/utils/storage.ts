@@ -143,5 +143,17 @@ export const storage = {
   clearAll: (): void => {
     const keys = Object.keys(localStorage).filter(key => key.startsWith('randstudy_'));
     keys.forEach(key => localStorage.removeItem(key));
+  },
+
+  getCalendarIntegrations: (): CalendarIntegration[] => {
+    const integrations = localStorage.getItem('randstudy_calendar_integrations');
+    return integrations ? JSON.parse(integrations) : [];
+  },
+
+  setCalendarIntegrations: (integrations: CalendarIntegration[]): void => {
+    localStorage.setItem('randstudy_calendar_integrations', JSON.stringify(integrations));
   }
 }
+
+// Import types for storage functions
+import { CalendarIntegration } from './types';
