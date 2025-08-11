@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { WelcomeScreen } from './components/WelcomeScreen';
 import { AuthScreen } from './components/AuthScreen';
 import { ModuleEntry } from './components/ModuleEntry';
@@ -7,12 +8,24 @@ import { BreakScreen } from './components/BreakScreen';
 import { MoodTracker } from './components/MoodTracker';
 import { SettingsPanel } from './components/SettingsPanel';
 import { CalendarSyncPanel } from './components/CalendarSyncPanel';
+import { ThemeManager } from './utils/themes';
 import { storage } from './utils/storage';
 import { generateDailySchedule } from './utils/scheduleGenerator';
 import { User, Module, StudySession, MoodEntry, AppState, Notification, Achievement, StudyGoal, CalendarIntegration } from './utils/types';
 import { NotificationManager, GoalManager } from './utils/notifications';
 
 function App() {
+  // Initialize theme on app start
+  useEffect(() => {
+    const storedTheme = ThemeManager.getStoredTheme();
+    if (storedTheme) {
+      ThemeManager.applyTheme(storedTheme);
+    } else {
+      // Apply default theme
+      ThemeManager.applyTheme(ThemeManager.PREDEFINED_THEMES['modern-light']);
+    }
+  }, []);
+
   const [appState, setAppState] = useState<AppState>({
     user: null,
     modules: [],

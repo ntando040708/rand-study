@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { Settings, Bell, Volume2, Palette, Clock, ArrowLeft, Save } from 'lucide-react';
+import { Settings, Bell, Volume2, Palette, Clock, ArrowLeft, Save, Sparkles } from 'lucide-react';
+import { ThemeCustomizer } from './ThemeCustomizer';
+import { ThemeManager } from '../utils/themes';
+import { ThemeConfig } from '../utils/types';
 
 interface SettingsPanelProps {
   settings: any;
@@ -13,6 +16,8 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onBack
 }) => {
   const [localSettings, setLocalSettings] = useState(settings);
+  const [showThemeCustomizer, setShowThemeCustomizer] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<ThemeConfig>(ThemeManager.getStoredTheme() || ThemeManager.PREDEFINED_THEMES['modern-light']);
 
   const handleSave = () => {
     onUpdateSettings(localSettings);
@@ -24,6 +29,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
       ...prev,
       [key]: value
     }));
+  };
+
+  const handleThemeChange = (theme: ThemeConfig) => {
+    setCurrentTheme(theme);
+    updateSetting('theme', theme);
+    ThemeManager.applyTheme(theme);
   };
 
   return (
@@ -172,26 +183,54 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           {/* Theme */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center mb-4">
-              <Palette className="w-5 h-5 text-orange-600 mr-2" />
+              <Palette className="w-5 h-5 text-purple-600 mr-2" />
               <h3 className="font-semibold text-gray-900">Appearance</h3>
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Theme
-              </label>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-gray-900">Current Theme</h4>
+                  <p className="text-sm text-gray-600">{currentTheme.name}</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div 
+                    className="w-8 h-8 rounded-full border-2 border-gray-300"
+                    style={{ backgroundColor: currentTheme.colorScheme.primary }}
+                  />
+                  <div 
+                    className="w-8 h-8 rounded-full border-2 border-gray-300"
+                    style={{ backgroundColor: currentTheme.colorScheme.secondary }}
+                  />
+                </div>
+              </div>
+              
+              <button
+                onClick={() => setShowThemeCustomizer(true)}
+                className="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-colors"
+              >
+                <Sparkles className="w-5 h-5 mr-2" />
+                Customize Theme
+              </button>
+              
               <div className="grid grid-cols-3 gap-3">
-                {['light', 'dark', 'auto'].map((theme) => (
+                {Object.entries(ThemeManager.PREDEFINED_THEMES).slice(0, 3).map(([key, theme]) => (
                   <button
-                    key={theme}
-                    onClick={() => updateSetting('theme', theme)}
-                    className={`p-3 rounded-lg border-2 transition-all capitalize ${
-                      localSettings.theme === theme
-                        ? 'border-orange-500 bg-orange-50'
+                    key={key}
+                    onClick={() => handleThemeChange(theme)}
+                    className={`p-3 rounded-lg border-2 transition-all ${
+                      currentTheme.name === theme.name
+                        ? 'border-purple-500 bg-purple-50'
                         : 'border-gray-200 hover:border-orange-300'
                     }`}
                   >
-                    {theme}
+                    <div 
+                      className="w-full h-8 rounded mb-2"
+                      style={{ 
+                        background: `linear-gradient(135deg, ${theme.colorScheme.gradient.join(', ')})` 
+                      }}
+                    />
+                    <span className="text-xs font-medium">{theme.name}</span>
                   </button>
                 ))}
               </div>
@@ -208,6 +247,15 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           </button>
         </div>
       </div>
+      
+      {/* Theme Customizer Modal */}
+      {showThemeCustomizer && (
+        <ThemeCustomizer
+          currentTheme={currentTheme}
+          onThemeChange={handleThemeChange}
+          onClose={() => setShowThemeCustomizer(false)}
+        />
+      )}
     </div>
   );
 };

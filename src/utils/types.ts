@@ -165,3 +165,55 @@ export interface CalendarConflict {
   suggestedResolution: 'reschedule' | 'shorten' | 'skip';
   alternativeSlots: string[];
 }
+
+export interface AppSettings {
+  notifications: boolean;
+  soundEnabled: boolean;
+  theme: ThemeConfig;
+  sessionReminders: boolean;
+  breakReminders: boolean;
+  defaultSessionLength: number;
+  defaultBreakLength: number;
+  studySounds: StudySoundSettings;
+  privacy: PrivacySettings;
+  integrations: IntegrationSettings;
+  gamification: GamificationSettings;
+}
+
+export interface ThemeConfig {
+  name: string;
+  mode: 'light' | 'dark' | 'auto';
+  colorScheme: ColorScheme;
+  layout: LayoutConfig;
+  customizations: ThemeCustomizations;
+}
+
+export interface ColorScheme {
+  primary: string;
+  secondary: string;
+  accent: string;
+  background: string;
+  surface: string;
+  text: string;
+  textSecondary: string;
+  success: string;
+  warning: string;
+  error: string;
+  gradient: string[];
+}
+
+export interface LayoutConfig {
+  density: 'compact' | 'comfortable' | 'spacious';
+  borderRadius: 'sharp' | 'rounded' | 'extra-rounded';
+  shadows: 'none' | 'subtle' | 'prominent';
+  animations: 'none' | 'reduced' | 'full';
+}
+
+export interface ThemeCustomizations {
+  customColors: { [key: string]: string };
+  fontFamily: string;
+  fontSize: 'small' | 'medium' | 'large';
+  moduleColorOverrides: { [moduleId: string]: string };
+}
+
+export interface StudySoundSettings {
