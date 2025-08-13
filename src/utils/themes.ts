@@ -4,21 +4,21 @@ export class ThemeManager {
   private static readonly THEME_STORAGE_KEY = 'randstudy_theme';
   
   static readonly PREDEFINED_THEMES: { [key: string]: ThemeConfig } = {
-    'modern-light': {
-      name: 'Modern Light',
+    'orange-energy': {
+      name: 'Orange Energy',
       mode: 'light',
       colorScheme: {
-        primary: '#3B82F6',
-        secondary: '#8B5CF6',
-        accent: '#10B981',
+        primary: '#FF6B35',
+        secondary: '#FF8C42',
+        accent: '#FFB627',
         background: '#FFFFFF',
-        surface: '#F8FAFC',
-        text: '#1F2937',
-        textSecondary: '#6B7280',
+        surface: '#FFF8F3',
+        text: '#1A1A1A',
+        textSecondary: '#4A4A4A',
         success: '#10B981',
-        warning: '#F59E0B',
+        warning: '#FFB627',
         error: '#EF4444',
-        gradient: ['#3B82F6', '#8B5CF6']
+        gradient: ['#FF6B35', '#FF8C42', '#FFB627']
       },
       layout: {
         density: 'comfortable',
@@ -34,21 +34,21 @@ export class ThemeManager {
       }
     },
     
-    'dark-pro': {
-      name: 'Dark Pro',
+    'midnight-orange': {
+      name: 'Midnight Orange',
       mode: 'dark',
       colorScheme: {
-        primary: '#60A5FA',
-        secondary: '#A78BFA',
-        accent: '#34D399',
-        background: '#0F172A',
-        surface: '#1E293B',
-        text: '#F1F5F9',
-        textSecondary: '#94A3B8',
-        success: '#34D399',
-        warning: '#FBBF24',
-        error: '#F87171',
-        gradient: ['#1E293B', '#334155']
+        primary: '#FF6B35',
+        secondary: '#FF8C42',
+        accent: '#FFB627',
+        background: '#0A0A0A',
+        surface: '#1A1A1A',
+        text: '#FFFFFF',
+        textSecondary: '#CCCCCC',
+        success: '#10B981',
+        warning: '#FFB627',
+        error: '#FF4444',
+        gradient: ['#1A1A1A', '#2A1A0A', '#FF6B35']
       },
       layout: {
         density: 'comfortable',
@@ -64,27 +64,27 @@ export class ThemeManager {
       }
     },
     
-    'nature-zen': {
-      name: 'Nature Zen',
+    'orange-gradient': {
+      name: 'Orange Gradient',
       mode: 'light',
       colorScheme: {
-        primary: '#059669',
-        secondary: '#0D9488',
-        accent: '#84CC16',
-        background: '#F0FDF4',
-        surface: '#ECFDF5',
-        text: '#064E3B',
-        textSecondary: '#047857',
+        primary: '#FF6B35',
+        secondary: '#FF4500',
+        accent: '#FFA500',
+        background: '#FFF9F5',
+        surface: '#FFEDE0',
+        text: '#2D1B0A',
+        textSecondary: '#5D3A1A',
         success: '#10B981',
-        warning: '#D97706',
+        warning: '#FFB627',
         error: '#DC2626',
-        gradient: ['#059669', '#0D9488', '#84CC16']
+        gradient: ['#FF6B35', '#FF8C42', '#FFA500']
       },
       layout: {
-        density: 'spacious',
+        density: 'comfortable',
         borderRadius: 'extra-rounded',
         shadows: 'subtle',
-        animations: 'reduced'
+        animations: 'full'
       },
       customizations: {
         customColors: {},
@@ -94,51 +94,21 @@ export class ThemeManager {
       }
     },
     
-    'sunset-warm': {
-      name: 'Sunset Warm',
+    'black-orange': {
+      name: 'Black Orange',
       mode: 'light',
       colorScheme: {
-        primary: '#EA580C',
-        secondary: '#DC2626',
-        accent: '#F59E0B',
-        background: '#FFF7ED',
-        surface: '#FFEDD5',
-        text: '#9A3412',
-        textSecondary: '#C2410C',
+        primary: '#FF6B35',
+        secondary: '#000000',
+        accent: '#FF8C42',
+        background: '#FFFFFF',
+        surface: '#F5F5F5',
+        text: '#000000',
+        textSecondary: '#333333',
         success: '#16A34A',
-        warning: '#D97706',
-        error: '#DC2626',
-        gradient: ['#EA580C', '#DC2626', '#F59E0B']
-      },
-      layout: {
-        density: 'comfortable',
-        borderRadius: 'extra-rounded',
-        shadows: 'subtle',
-        animations: 'full'
-      },
-      customizations: {
-        customColors: {},
-        fontFamily: 'Inter, system-ui, sans-serif',
-        fontSize: 'medium',
-        moduleColorOverrides: {}
-      }
-    },
-    
-    'ocean-blue': {
-      name: 'Ocean Blue',
-      mode: 'light',
-      colorScheme: {
-        primary: '#0EA5E9',
-        secondary: '#3B82F6',
-        accent: '#06B6D4',
-        background: '#F0F9FF',
-        surface: '#E0F2FE',
-        text: '#0C4A6E',
-        textSecondary: '#0369A1',
-        success: '#059669',
-        warning: '#D97706',
-        error: '#DC2626',
-        gradient: ['#0EA5E9', '#3B82F6', '#06B6D4']
+        warning: '#FFB627',
+        error: '#EF4444',
+        gradient: ['#000000', '#FF6B35', '#FF8C42']
       },
       layout: {
         density: 'comfortable',
@@ -154,25 +124,25 @@ export class ThemeManager {
       }
     },
     
-    'midnight-purple': {
-      name: 'Midnight Purple',
+    'dark-orange': {
+      name: 'Dark Orange',
       mode: 'dark',
       colorScheme: {
-        primary: '#A855F7',
-        secondary: '#EC4899',
-        accent: '#06B6D4',
-        background: '#1A0B2E',
-        surface: '#2D1B69',
-        text: '#E2E8F0',
-        textSecondary: '#A78BFA',
+        primary: '#FF8C42',
+        secondary: '#FF6B35',
+        accent: '#FFB627',
+        background: '#1A1A1A',
+        surface: '#2A2A2A',
+        text: '#FFFFFF',
+        textSecondary: '#E0E0E0',
         success: '#10B981',
-        warning: '#F59E0B',
-        error: '#F87171',
-        gradient: ['#1A0B2E', '#2D1B69', '#7C3AED']
+        warning: '#FFB627',
+        error: '#FF4444',
+        gradient: ['#2A2A2A', '#FF6B35', '#FF8C42']
       },
       layout: {
         density: 'comfortable',
-        borderRadius: 'extra-rounded',
+        borderRadius: 'rounded',
         shadows: 'prominent',
         animations: 'full'
       },
@@ -184,57 +154,87 @@ export class ThemeManager {
       }
     },
     
-    'minimal-mono': {
-      name: 'Minimal Mono',
+    'orange-black-pro': {
+      name: 'Orange Black Pro',
+      mode: 'dark',
+      colorScheme: {
+        primary: '#FF6B35',
+        secondary: '#FF4500',
+        accent: '#FFA500',
+        background: '#000000',
+        surface: '#1A0A00',
+        text: '#FFFFFF',
+        textSecondary: '#FFB627',
+        success: '#10B981',
+        warning: '#FFB627',
+        error: '#FF4444',
+        gradient: ['#000000', '#1A0A00', '#FF6B35']
+      },
+      layout: {
+        density: 'comfortable',
+        borderRadius: 'rounded',
+        shadows: 'prominent',
+        animations: 'full'
+      },
+      customizations: {
+        customColors: {},
+        fontFamily: 'Inter, system-ui, sans-serif',
+        fontSize: 'medium',
+        moduleColorOverrides: {}
+      }
+    },
+    
+    'orange-minimal': {
+      name: 'Orange Minimal',
       mode: 'light',
       colorScheme: {
-        primary: '#374151',
-        secondary: '#6B7280',
-        accent: '#111827',
+        primary: '#FF6B35',
+        secondary: '#FF8C42',
+        accent: '#000000',
         background: '#FFFFFF',
         surface: '#F9FAFB',
-        text: '#111827',
-        textSecondary: '#6B7280',
-        success: '#059669',
-        warning: '#D97706',
-        error: '#DC2626',
-        gradient: ['#F9FAFB', '#E5E7EB']
+        text: '#000000',
+        textSecondary: '#666666',
+        success: '#10B981',
+        warning: '#FFB627',
+        error: '#EF4444',
+        gradient: ['#FFFFFF', '#FFF8F3']
       },
       layout: {
         density: 'compact',
-        borderRadius: 'sharp',
-        shadows: 'none',
-        animations: 'reduced'
+        borderRadius: 'rounded',
+        shadows: 'subtle',
+        animations: 'full'
       },
       customizations: {
         customColors: {},
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 'small',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        fontSize: 'medium',
         moduleColorOverrides: {}
       }
     },
     
-    'high-contrast': {
-      name: 'High Contrast',
+    'high-contrast-orange': {
+      name: 'High Contrast Orange',
       mode: 'light',
       colorScheme: {
-        primary: '#000000',
-        secondary: '#1F2937',
-        accent: '#DC2626',
+        primary: '#FF4500',
+        secondary: '#000000',
+        accent: '#FF6B35',
         background: '#FFFFFF',
         surface: '#F3F4F6',
         text: '#000000',
-        textSecondary: '#374151',
-        success: '#059669',
-        warning: '#D97706',
-        error: '#DC2626',
-        gradient: ['#FFFFFF', '#F3F4F6']
+        textSecondary: '#333333',
+        success: '#10B981',
+        warning: '#FFB627',
+        error: '#EF4444',
+        gradient: ['#FFFFFF', '#FFF8F3']
       },
       layout: {
         density: 'spacious',
-        borderRadius: 'sharp',
+        borderRadius: 'rounded',
         shadows: 'prominent',
-        animations: 'none'
+        animations: 'full'
       },
       customizations: {
         customColors: {},
@@ -328,7 +328,7 @@ export class ThemeManager {
     baseName: string,
     customizations: Partial<ThemeConfig>
   ): ThemeConfig {
-    const baseTheme = this.PREDEFINED_THEMES[baseName] || this.PREDEFINED_THEMES['modern-light'];
+    const baseTheme = this.PREDEFINED_THEMES[baseName] || this.PREDEFINED_THEMES['orange-energy'];
     
     return {
       ...baseTheme,
@@ -357,9 +357,9 @@ export class ThemeManager {
     return {
       primary: primaryColor,
       secondary: this.hslToHex((hsl.h + 60) % 360, hsl.s, hsl.l),
-      accent: this.hslToHex((hsl.h + 120) % 360, hsl.s, hsl.l),
+      accent: this.hslToHex((hsl.h + 60) % 360, Math.min(hsl.s + 20, 100), Math.min(hsl.l + 10, 80)),
       success: '#10B981',
-      warning: '#F59E0B',
+      warning: '#FFB627',
       error: '#EF4444'
     };
   }

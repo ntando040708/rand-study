@@ -39,8 +39,8 @@ export const BREAK_SUGGESTIONS: BreakSuggestion[] = [
 ];
 
 export const MODULE_COLORS = [
-  '#3B82F6', '#EF4444', '#10B981', '#F59E0B', 
-  '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'
+  '#FF6B35', '#FF4500', '#FFA500', '#FFB627', 
+  '#FF8C42', '#000000', '#333333', '#666666'
 ];
 
 export const MOOD_EMOJIS = ['😡', '😕', '😐', '🙂', '😁'];

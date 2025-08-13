@@ -46,11 +46,11 @@ export const ModuleEntry: React.FC<ModuleEntryProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 p-6">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <BookOpen className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Add Your Modules</h1>
@@ -73,7 +73,7 @@ export const ModuleEntry: React.FC<ModuleEntryProps> = ({
                   type="text"
                   value={newModule.code}
                   onChange={(e) => setNewModule({ ...newModule, code: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="e.g., CS101"
                 />
               </div>
@@ -86,7 +86,7 @@ export const ModuleEntry: React.FC<ModuleEntryProps> = ({
                   type="text"
                   value={newModule.name}
                   onChange={(e) => setNewModule({ ...newModule, name: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="e.g., Computer Science Fundamentals"
                 />
               </div>
@@ -114,7 +114,7 @@ export const ModuleEntry: React.FC<ModuleEntryProps> = ({
             <button
               onClick={addModule}
               disabled={!newModule.code.trim() || !newModule.name.trim()}
-              className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               <Plus className="w-5 h-5 mr-2" />
               Add Module
@@ -177,7 +177,7 @@ export const ModuleEntry: React.FC<ModuleEntryProps> = ({
         {modules.length > 0 && (
           <button
             onClick={handleSubmit}
-            className="w-full bg-green-600 text-white font-semibold py-4 px-6 rounded-xl hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center"
+            className="w-full bg-gradient-to-r from-black to-gray-800 text-white font-semibold py-4 px-6 rounded-xl hover:from-gray-800 hover:to-black transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center"
           >
             <Check className="w-5 h-5 mr-2" />
             Generate My Study Schedule

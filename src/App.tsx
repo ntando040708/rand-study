@@ -22,7 +22,7 @@ function App() {
       ThemeManager.applyTheme(storedTheme);
     } else {
       // Apply default theme
-      ThemeManager.applyTheme(ThemeManager.PREDEFINED_THEMES['modern-light']);
+      ThemeManager.applyTheme(ThemeManager.PREDEFINED_THEMES['orange-energy']);
     }
   }, []);
 

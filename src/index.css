@@ -4,17 +4,17 @@
 
 /* CSS Custom Properties for Theming */
 :root {
-  --color-primary: #3B82F6;
-  --color-secondary: #8B5CF6;
-  --color-accent: #10B981;
+  --color-primary: #FF6B35;
+  --color-secondary: #FF8C42;
+  --color-accent: #FFB627;
   --color-background: #FFFFFF;
-  --color-surface: #F8FAFC;
-  --color-text: #1F2937;
-  --color-text-secondary: #6B7280;
+  --color-surface: #FFF8F3;
+  --color-text: #1A1A1A;
+  --color-text-secondary: #4A4A4A;
   --color-success: #10B981;
-  --color-warning: #F59E0B;
+  --color-warning: #FFB627;
   --color-error: #EF4444;
-  --gradient-primary: linear-gradient(135deg, #3B82F6, #8B5CF6);
+  --gradient-primary: linear-gradient(135deg, #FF6B35, #FF8C42, #FFB627);
   --spacing-base: 1rem;
   --border-radius: 0.5rem;
   --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
@@ -25,10 +25,10 @@
 
 /* Dark theme overrides */
 .dark-theme {
-  --color-background: #0F172A;
-  --color-surface: #1E293B;
-  --color-text: #F1F5F9;
-  --color-text-secondary: #94A3B8;
+  --color-background: #0A0A0A;
+  --color-surface: #1A1A1A;
+  --color-text: #FFFFFF;
+  --color-text-secondary: #CCCCCC;
 }
 
 /* Apply theme variables to components */
