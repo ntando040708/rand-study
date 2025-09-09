@@ -4,21 +4,21 @@ export class ThemeManager {
   private static readonly THEME_STORAGE_KEY = 'randstudy_theme';
   
   static readonly PREDEFINED_THEMES: { [key: string]: ThemeConfig } = {
-    'orange-energy': {
-      name: 'Orange Energy',
+    'ocean-blue': {
+      name: 'Ocean Blue',
       mode: 'light',
       colorScheme: {
-        primary: '#FF6B35',
-        secondary: '#FF8C42',
-        accent: '#FFB627',
+        primary: '#3B82F6',
+        secondary: '#1E40AF',
+        accent: '#06B6D4',
         background: '#FFFFFF',
-        surface: '#FFF8F3',
+        surface: '#F8FAFC',
         text: '#1A1A1A',
         textSecondary: '#4A4A4A',
         success: '#10B981',
-        warning: '#FFB627',
+        warning: '#F59E0B',
         error: '#EF4444',
-        gradient: ['#FF6B35', '#FF8C42', '#FFB627']
+        gradient: ['#3B82F6', '#1E40AF', '#06B6D4']
       },
       layout: {
         density: 'comfortable',
@@ -34,21 +34,21 @@ export class ThemeManager {
       }
     },
     
-    'midnight-orange': {
-      name: 'Midnight Orange',
+    'midnight-blue': {
+      name: 'Midnight Blue',
       mode: 'dark',
       colorScheme: {
-        primary: '#FF6B35',
-        secondary: '#FF8C42',
-        accent: '#FFB627',
-        background: '#0A0A0A',
-        surface: '#1A1A1A',
+        primary: '#60A5FA',
+        secondary: '#3B82F6',
+        accent: '#06B6D4',
+        background: '#0F172A',
+        surface: '#1E293B',
         text: '#FFFFFF',
-        textSecondary: '#CCCCCC',
+        textSecondary: '#CBD5E1',
         success: '#10B981',
-        warning: '#FFB627',
-        error: '#FF4444',
-        gradient: ['#1A1A1A', '#2A1A0A', '#FF6B35']
+        warning: '#F59E0B',
+        error: '#EF4444',
+        gradient: ['#0F172A', '#1E293B', '#3B82F6']
       },
       layout: {
         density: 'comfortable',
@@ -64,21 +64,21 @@ export class ThemeManager {
       }
     },
     
-    'orange-gradient': {
-      name: 'Orange Gradient',
+    'sky-gradient': {
+      name: 'Sky Gradient',
       mode: 'light',
       colorScheme: {
-        primary: '#FF6B35',
-        secondary: '#FF4500',
-        accent: '#FFA500',
-        background: '#FFF9F5',
-        surface: '#FFEDE0',
-        text: '#2D1B0A',
-        textSecondary: '#5D3A1A',
+        primary: '#0EA5E9',
+        secondary: '#0284C7',
+        accent: '#38BDF8',
+        background: '#F0F9FF',
+        surface: '#E0F2FE',
+        text: '#0C4A6E',
+        textSecondary: '#075985',
         success: '#10B981',
-        warning: '#FFB627',
-        error: '#DC2626',
-        gradient: ['#FF6B35', '#FF8C42', '#FFA500']
+        warning: '#F59E0B',
+        error: '#EF4444',
+        gradient: ['#0EA5E9', '#0284C7', '#38BDF8']
       },
       layout: {
         density: 'comfortable',
@@ -94,21 +94,21 @@ export class ThemeManager {
       }
     },
     
-    'black-orange': {
-      name: 'Black Orange',
+    'navy-blue': {
+      name: 'Navy Blue',
       mode: 'light',
       colorScheme: {
-        primary: '#FF6B35',
-        secondary: '#000000',
-        accent: '#FF8C42',
+        primary: '#1E40AF',
+        secondary: '#1E3A8A',
+        accent: '#3B82F6',
         background: '#FFFFFF',
         surface: '#F5F5F5',
-        text: '#000000',
-        textSecondary: '#333333',
+        text: '#1E293B',
+        textSecondary: '#475569',
         success: '#16A34A',
-        warning: '#FFB627',
+        warning: '#F59E0B',
         error: '#EF4444',
-        gradient: ['#000000', '#FF6B35', '#FF8C42']
+        gradient: ['#1E40AF', '#1E3A8A', '#3B82F6']
       },
       layout: {
         density: 'comfortable',
@@ -124,21 +124,21 @@ export class ThemeManager {
       }
     },
     
-    'dark-orange': {
-      name: 'Dark Orange',
+    'deep-blue': {
+      name: 'Deep Blue',
       mode: 'dark',
       colorScheme: {
-        primary: '#FF8C42',
-        secondary: '#FF6B35',
-        accent: '#FFB627',
-        background: '#1A1A1A',
-        surface: '#2A2A2A',
+        primary: '#60A5FA',
+        secondary: '#3B82F6',
+        accent: '#06B6D4',
+        background: '#0C1426',
+        surface: '#1E293B',
         text: '#FFFFFF',
-        textSecondary: '#E0E0E0',
+        textSecondary: '#94A3B8',
         success: '#10B981',
-        warning: '#FFB627',
-        error: '#FF4444',
-        gradient: ['#2A2A2A', '#FF6B35', '#FF8C42']
+        warning: '#F59E0B',
+        error: '#EF4444',
+        gradient: ['#0C1426', '#1E293B', '#3B82F6']
       },
       layout: {
         density: 'comfortable',
@@ -154,21 +154,21 @@ export class ThemeManager {
       }
     },
     
-    'orange-black-pro': {
-      name: 'Orange Black Pro',
+    'azure-pro': {
+      name: 'Azure Pro',
       mode: 'dark',
       colorScheme: {
-        primary: '#FF6B35',
-        secondary: '#FF4500',
-        accent: '#FFA500',
-        background: '#000000',
-        surface: '#1A0A00',
+        primary: '#0EA5E9',
+        secondary: '#0284C7',
+        accent: '#38BDF8',
+        background: '#020617',
+        surface: '#0F172A',
         text: '#FFFFFF',
-        textSecondary: '#FFB627',
+        textSecondary: '#0EA5E9',
         success: '#10B981',
-        warning: '#FFB627',
-        error: '#FF4444',
-        gradient: ['#000000', '#1A0A00', '#FF6B35']
+        warning: '#F59E0B',
+        error: '#EF4444',
+        gradient: ['#020617', '#0F172A', '#0EA5E9']
       },
       layout: {
         density: 'comfortable',
@@ -184,21 +184,21 @@ export class ThemeManager {
       }
     },
     
-    'orange-minimal': {
-      name: 'Orange Minimal',
+    'blue-minimal': {
+      name: 'Blue Minimal',
       mode: 'light',
       colorScheme: {
-        primary: '#FF6B35',
-        secondary: '#FF8C42',
-        accent: '#000000',
+        primary: '#3B82F6',
+        secondary: '#1E40AF',
+        accent: '#1E293B',
         background: '#FFFFFF',
         surface: '#F9FAFB',
-        text: '#000000',
-        textSecondary: '#666666',
+        text: '#1E293B',
+        textSecondary: '#64748B',
         success: '#10B981',
-        warning: '#FFB627',
+        warning: '#F59E0B',
         error: '#EF4444',
-        gradient: ['#FFFFFF', '#FFF8F3']
+        gradient: ['#FFFFFF', '#F8FAFC']
       },
       layout: {
         density: 'compact',
@@ -214,21 +214,21 @@ export class ThemeManager {
       }
     },
     
-    'high-contrast-orange': {
-      name: 'High Contrast Orange',
+    'high-contrast-blue': {
+      name: 'High Contrast Blue',
       mode: 'light',
       colorScheme: {
-        primary: '#FF4500',
-        secondary: '#000000',
-        accent: '#FF6B35',
+        primary: '#1E40AF',
+        secondary: '#1E293B',
+        accent: '#3B82F6',
         background: '#FFFFFF',
         surface: '#F3F4F6',
-        text: '#000000',
-        textSecondary: '#333333',
+        text: '#1E293B',
+        textSecondary: '#374151',
         success: '#10B981',
-        warning: '#FFB627',
+        warning: '#F59E0B',
         error: '#EF4444',
-        gradient: ['#FFFFFF', '#FFF8F3']
+        gradient: ['#FFFFFF', '#F8FAFC']
       },
       layout: {
         density: 'spacious',

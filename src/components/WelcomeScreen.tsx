@@ -15,10 +15,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       {/* Header */}
       <header className="pt-8 pb-6 px-6 text-center">
         <div className="flex items-center justify-center mb-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mr-3 shadow-lg">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-3 shadow-lg">
             <BookOpen className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">RandStudy</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">RandStudy</h1>
         </div>
         <p className="text-gray-600 text-lg max-w-md mx-auto leading-relaxed">
           Smart randomized study scheduling that adapts to your learning style
@@ -30,8 +30,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         <div className="max-w-4xl mx-auto">
           {/* Hero Section */}
           <div className="text-center mb-12">
-            <div className="w-32 h-32 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full mx-auto mb-8 flex items-center justify-center shadow-inner">
-              <Target className="w-16 h-16 text-orange-600" />
+            <div className="w-32 h-32 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full mx-auto mb-8 flex items-center justify-center shadow-inner">
+              <Target className="w-16 h-16 text-blue-600" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               Study Smarter, Not Harder
@@ -45,8 +45,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           {/* Features Grid */}
           <div className="grid md:grid-cols-3 gap-6 mb-12">
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
-                <BookOpen className="w-6 h-6 text-orange-600" />
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                <BookOpen className="w-6 h-6 text-blue-600" />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Smart Scheduling</h3>
               <p className="text-gray-600 text-sm leading-relaxed">
@@ -55,7 +55,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             </div>
 
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center mb-4">
                 <Target className="w-6 h-6 text-white" />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Focused Sessions</h3>
@@ -65,7 +65,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             </div>
 
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-500 rounded-xl flex items-center justify-center mb-4">
                 <TrendingUp className="w-6 h-6 text-white" />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Track Progress</h3>
@@ -79,13 +79,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <div className="text-center space-y-4">
             <button
               onClick={onGetStarted}
-              className="w-full max-w-sm bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold py-4 px-8 rounded-2xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="w-full max-w-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-4 px-8 rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               Get Started
             </button>
             <button
               onClick={onLogin}
-              className="w-full max-w-sm bg-white text-orange-600 font-semibold py-4 px-8 rounded-2xl border-2 border-orange-600 hover:bg-orange-50 transition-all duration-200"
+              className="w-full max-w-sm bg-white text-blue-600 font-semibold py-4 px-8 rounded-2xl border-2 border-blue-600 hover:bg-blue-50 transition-all duration-200"
             >
               Already have an account? Login
             </button>

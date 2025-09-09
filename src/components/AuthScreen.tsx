@@ -94,7 +94,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                     className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       placeholder="Enter your full name"
                       required={!isLogin}
                     />
@@ -131,7 +131,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                    className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="Enter your password"
                     required
                   />
@@ -148,7 +148,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
               </button>
@@ -158,7 +158,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             <div className="mt-6 text-center">
               <button
                 onClick={onToggleMode}
-                className="text-orange-600 hover:text-orange-700 font-medium transition-colors"
+                className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
               >
                 {isLogin 
                   ? "Don't have an account? Sign up" 

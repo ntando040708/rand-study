@@ -120,7 +120,7 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
               Welcome back, {user.name}!
             </h1>
             <p className="text-gray-600">
@@ -135,7 +135,7 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
               <div className="mt-2">
                 <button
                   onClick={() => setShowInsights(!showInsights)}
-                  className="text-sm text-orange-600 hover:text-orange-700 flex items-center"
+                  className="text-sm text-blue-600 hover:text-blue-700 flex items-center"
                 >
                   <Brain className="w-4 h-4 mr-1" />
                   {insights.length} AI Insights Available
@@ -182,9 +182,9 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
 
         {/* AI Insights Panel */}
         {showInsights && insights.length > 0 && (
-          <div className="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-2xl p-6 mb-8 border border-orange-100">
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 mb-8 border border-blue-100">
             <div className="flex items-center mb-4">
-              <Brain className="w-6 h-6 text-orange-600 mr-2" />
+              <Brain className="w-6 h-6 text-blue-600 mr-2" />
               <h3 className="font-semibold text-gray-900">AI Study Insights</h3>
             </div>
             <div className="space-y-3">
@@ -200,11 +200,11 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
                   }`}
                 >
                   <div className="flex items-start">
-                    <Lightbulb className="w-5 h-5 text-orange-600 mr-3 mt-0.5 flex-shrink-0" />
+                    <Lightbulb className="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
                     <div>
                       <h4 className="font-medium text-gray-900 mb-1">{insight.title}</h4>
                       <p className="text-sm text-gray-600 mb-2">{insight.description}</p>
-                      <p className="text-sm font-medium text-orange-700">{insight.actionable}</p>
+                      <p className="text-sm font-medium text-blue-700">{insight.actionable}</p>
                     </div>
                   </div>
                 </div>
@@ -219,10 +219,10 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Study Streak</p>
-                <p className="text-2xl font-bold text-orange-600">{user.streak} days</p>
+                <p className="text-2xl font-bold text-blue-600">{user.streak} days</p>
               </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-orange-600" />
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-blue-600" />
               </div>
             </div>
           </div>
@@ -231,12 +231,12 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Today's Progress</p>
-                <p className="text-2xl font-bold text-orange-500">
+                <p className="text-2xl font-bold text-blue-500">
                   {completedSessions}/{totalSessions}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-orange-500" />
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-blue-500" />
               </div>
             </div>
           </div>
@@ -245,9 +245,9 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Weekly Hours</p>
-                <p className="text-2xl font-bold text-black">{Math.round(weeklyStats.totalStudyTime / 60)}h</p>
+                <p className="text-2xl font-bold text-slate-800">{Math.round(weeklyStats.totalStudyTime / 60)}h</p>
               </div>
-              <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center">
                 <Clock className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -257,12 +257,12 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Avg Mood</p>
-                <p className="text-2xl font-bold text-orange-500">
+                <p className="text-2xl font-bold text-blue-500">
                   {weeklyStats.averageMood > 0 ? weeklyStats.averageMood.toFixed(1) : 'N/A'}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                <Target className="w-6 h-6 text-orange-500" />
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <Target className="w-6 h-6 text-blue-500" />
               </div>
             </div>
           </div>
@@ -271,10 +271,10 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Achievements</p>
-                <p className="text-2xl font-bold text-orange-400">{achievements.length}</p>
+                <p className="text-2xl font-bold text-cyan-500">{achievements.length}</p>
               </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-orange-400" />
+              <div className="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center">
+                <Trophy className="w-6 h-6 text-cyan-500" />
               </div>
             </div>
           </div>
@@ -288,7 +288,7 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
             <div
-              className="bg-gradient-to-r from-orange-500 to-orange-400 h-3 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-blue-500 to-blue-400 h-3 rounded-full transition-all duration-300"
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
@@ -328,7 +328,7 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
               {!activeSession ? (
                 <button
                   onClick={() => startSession(currentSession.id)}
-                  className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-colors flex items-center justify-center"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-colors flex items-center justify-center"
                 >
                   <Play className="w-5 h-5 mr-2" />
                   Start Session
@@ -344,7 +344,7 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
                   </button>
                   <button
                     onClick={takeBreak}
-                    className="flex-1 bg-black text-white font-semibold py-3 px-4 rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center"
+                    className="flex-1 bg-slate-800 text-white font-semibold py-3 px-4 rounded-xl hover:bg-slate-900 transition-colors flex items-center justify-center"
                   >
                     <SkipForward className="w-5 h-5 mr-2" />
                     Take Break
@@ -393,19 +393,19 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
         )}
 
         {!currentSession && totalSessions === completedSessions && totalSessions > 0 && (
-          <div className="bg-orange-50 rounded-2xl p-8 text-center border border-orange-200">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-blue-50 rounded-2xl p-8 text-center border border-blue-200">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <Calendar className="w-8 h-8 text-white" />
             </div>
             <h3 className="text-xl font-bold text-green-900 mb-2">
               Congratulations! 🎉
             </h3>
-            <p className="text-orange-700 mb-4">
+            <p className="text-blue-700 mb-4">
               You've completed all your study sessions for today!
             </p>
             <button
               onClick={onViewMood}
-              className="bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold py-2 px-6 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-colors"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-2 px-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-colors"
             >
               Log Your Mood
             </button>
