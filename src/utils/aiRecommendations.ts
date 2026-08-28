@@ -1,5 +1,13 @@
 import { MoodEntry, StudySession, Module, StudyPattern, AIRecommendation } from './types';
 
+// Define strict types for the accumulator to avoid 'any'
+interface TimeSlotStats {
+  total: number;
+  count: number;
+  avgMood: number;
+  avgProductivity: number;
+}
+
 export class AIRecommendationEngine {
   static generateRecommendations(
     moodEntries: MoodEntry[],
@@ -22,7 +30,7 @@ export class AIRecommendationEngine {
         title: 'Optimal Study Time Detected',
         description: `Your performance peaks at ${timePatterns.bestTime}`,
         confidence: timePatterns.confidence,
-        actionable: `Schedule your most challenging subjects during ${timePatterns.bestTime}`
+        actionable: `Schedule your most challenging subjects during the ${timePatterns.bestTime}`
       });
     }
 
@@ -60,7 +68,7 @@ export class AIRecommendationEngine {
     }
 
     const timePerformance = patterns.reduce((acc, pattern) => {
-      const hour = parseInt(pattern.timeOfDay.split(':')[0]);
+      const hour = parseInt(pattern.timeOfDay.split(':')[0], 10);
       const timeSlot = this.getTimeSlot(hour);
       
       if (!acc[timeSlot]) {
@@ -73,7 +81,7 @@ export class AIRecommendationEngine {
       acc[timeSlot].avgProductivity += pattern.productivity;
       
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, TimeSlotStats>);
 
     const bestSlot = Object.entries(timePerformance)
       .map(([slot, data]) => ({
@@ -104,16 +112,19 @@ export class AIRecommendationEngine {
     const recentMoods = moodEntries.slice(-10);
     const averageMood = recentMoods.reduce((sum, entry) => sum + entry.mood, 0) / recentMoods.length;
     
-    // Calculate trend
-    const firstHalf = recentMoods.slice(0, Math.floor(recentMoods.length / 2));
-    const secondHalf = recentMoods.slice(Math.floor(recentMoods.length / 2));
-    
-    const firstAvg = firstHalf.reduce((sum, entry) => sum + entry.mood, 0) / firstHalf.length;
-    const secondAvg = secondHalf.reduce((sum, entry) => sum + entry.mood, 0) / secondHalf.length;
-    
+    // Safely calculate trend, preventing division by zero if less than 2 entries exist
     let trend = 'stable';
-    if (secondAvg > firstAvg + 0.5) trend = 'improving';
-    if (secondAvg < firstAvg - 0.5) trend = 'declining';
+    if (recentMoods.length >= 2) {
+      const midPoint = Math.floor(recentMoods.length / 2);
+      const firstHalf = recentMoods.slice(0, midPoint);
+      const secondHalf = recentMoods.slice(midPoint);
+      
+      const firstAvg = firstHalf.length > 0 ? firstHalf.reduce((sum, entry) => sum + entry.mood, 0) / firstHalf.length : averageMood;
+      const secondAvg = secondHalf.length > 0 ? secondHalf.reduce((sum, entry) => sum + entry.mood, 0) / secondHalf.length : averageMood;
+      
+      if (secondAvg > firstAvg + 0.5) trend = 'improving';
+      if (secondAvg < firstAvg - 0.5) trend = 'declining';
+    }
 
     return { averageMood, trend };
   }
@@ -132,17 +143,20 @@ export class AIRecommendationEngine {
     return {
       completionRate,
       avgSessionMood,
-      productivity: (completionRate * 0.7) + (avgSessionMood / 5 * 0.3)
+      productivity: (completionRate * 0.7) + ((avgSessionMood / 5) * 0.3)
     };
   }
 
   private static detectStressIndicators(moodEntries: MoodEntry[], sessions: StudySession[]) {
+    // Look at recent history rather than all-time history
     const recentMoods = moodEntries.slice(-7);
+    const recentSessions = sessions.slice(-7);
+
     const lowMoodCount = recentMoods.filter(entry => entry.mood <= 2).length;
-    const incompleteSessions = sessions.filter(s => !s.completed).length;
+    const incompleteSessions = recentSessions.filter(s => !s.completed).length;
     
     const stressScore = (lowMoodCount / Math.max(recentMoods.length, 1)) * 0.6 + 
-                      (incompleteSessions / Math.max(sessions.length, 1)) * 0.4;
+                        (incompleteSessions / Math.max(recentSessions.length, 1)) * 0.4;
     
     return {
       isStressed: stressScore > 0.4,
