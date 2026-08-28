@@ -1,5 +1,11 @@
 import { StudyTechnique, PomodoroSettings } from './types';
 
+const ALGORITHM_CONSTANTS = {
+  MAX_SPACED_REPETITION_DAYS: 365,
+  MIN_INTERVAL_DAYS: 1,
+  DEFAULT_POMODORO_INTERVAL: 4
+} as const;
+
 export class StudyTechniqueManager {
   static getDefaultTechniques(): StudyTechnique[] {
     return [
@@ -59,7 +65,13 @@ export class StudyTechniqueManager {
   }
 
   static calculatePomodoroSession(settings: PomodoroSettings, sessionNumber: number) {
-    const isLongBreak = sessionNumber % settings.sessionsUntilLongBreak === 0;
+    // Prevent Modulo by Zero and prevent Session 0 from triggering an immediate long break
+    const safeInterval = settings.sessionsUntilLongBreak > 0 
+      ? settings.sessionsUntilLongBreak 
+      : ALGORITHM_CONSTANTS.DEFAULT_POMODORO_INTERVAL;
+      
+    const isLongBreak = sessionNumber > 0 && sessionNumber % safeInterval === 0;
+    
     return {
       workDuration: settings.workDuration,
       breakDuration: isLongBreak ? settings.longBreakDuration : settings.shortBreakDuration,
@@ -68,9 +80,9 @@ export class StudyTechniqueManager {
     };
   }
 
-  static generateActiveRecallPrompts(moduleId: string, topic: string) {
+  static generateActiveRecallPrompts(moduleId: string, topic: string): string[] {
     return [
-      `Explain ${topic} in your own words without looking at notes`,
+      `Explain ${topic} in your own words without looking at notes.`,
       `What are the key concepts related to ${topic}?`,
       `How does ${topic} connect to other concepts you've learned?`,
       `Can you think of a real-world example of ${topic}?`,
@@ -78,8 +90,15 @@ export class StudyTechniqueManager {
     ];
   }
 
-  static calculateSpacedRepetitionSchedule(difficulty: number, previousInterval: number) {
+  static calculateSpacedRepetitionSchedule(difficulty: number, previousInterval: number): number {
     const multiplier = difficulty >= 3 ? 2.5 : difficulty >= 2 ? 1.8 : 1.3;
-    return Math.min(Math.ceil(previousInterval * multiplier), 365);
+    
+    // Prevent the zero-interval trap where 0 * multiplier = 0 indefinitely
+    const safeInterval = Math.max(previousInterval, ALGORITHM_CONSTANTS.MIN_INTERVAL_DAYS);
+    
+    return Math.min(
+      Math.ceil(safeInterval * multiplier), 
+      ALGORITHM_CONSTANTS.MAX_SPACED_REPETITION_DAYS
+    );
   }
 }
