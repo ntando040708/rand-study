@@ -1,24 +1,38 @@
 import { WellnessData, MoodEntry } from './types';
 
 export class WellnessManager {
-  static calculateStressLevel(moodEntries: MoodEntry[], sessionCount: number): number {
+  /**
+   * Calculates a dynamic stress score (0-10) based on mood variance and session completion.
+   */
+  static calculateStressLevel(
+    moodEntries: MoodEntry[], 
+    totalSessions: number, 
+    incompleteSessions: number
+  ): number {
     const recentMoods = moodEntries.slice(-7);
     if (recentMoods.length === 0) return 0;
 
-    const avgMood = recentMoods.reduce((sum, entry) => sum + entry.mood, 0) / recentMoods.length;
-    const moodVariance = this.calculateVariance(recentMoods.map(e => e.mood));
+    const moodValues = recentMoods.map(e => e.mood);
+    const avgMood = moodValues.reduce((sum, mood) => sum + mood, 0) / moodValues.length;
+    const moodVariance = this.calculateVariance(moodValues);
     
     // High variance + low mood = high stress
-    const stressFromMood = (5 - avgMood) / 4; // 0-1 scale
-    const stressFromVariance = Math.min(moodVariance / 2, 1); // 0-1 scale
+    const stressFromMood = (5 - avgMood) / 4; // Normalized 0-1 scale
+    const stressFromVariance = Math.min(moodVariance / 2, 1); // Normalized 0-1 scale
     
-    // Factor in session completion rate
-    const incompleteSessions = sessionCount > 0 ? 0.2 : 0; // Assume some incomplete sessions add stress
+    // Dynamically factor in session completion rate
+    const incompletePenalty = totalSessions > 0 ? (incompleteSessions / totalSessions) : 0;
     
-    return Math.min((stressFromMood * 0.5 + stressFromVariance * 0.3 + incompleteSessions * 0.2) * 10, 10);
+    // Weighted formula: 50% Mood, 30% Variance, 20% Task Completion
+    const rawStressScore = (stressFromMood * 0.5) + (stressFromVariance * 0.3) + (incompletePenalty * 0.2);
+    
+    // Return final score capped at 10
+    return Math.min(rawStressScore * 10, 10);
   }
 
   private static calculateVariance(numbers: number[]): number {
+    if (numbers.length === 0) return 0; // Prevent Division by Zero
+    
     const mean = numbers.reduce((sum, num) => sum + num, 0) / numbers.length;
     const squaredDiffs = numbers.map(num => Math.pow(num - mean, 2));
     return squaredDiffs.reduce((sum, diff) => sum + diff, 0) / numbers.length;
@@ -28,29 +42,26 @@ export class WellnessManager {
     const reminders: string[] = [];
     const now = new Date();
     const lastCheck = new Date(wellnessData.lastWellnessCheck);
-    const hoursSinceCheck = (now.getTime() - lastCheck.getTime()) / (1000 * 60 * 60);
+    
+    // Calculate hours safely, preventing negative time if system clocks skew
+    const hoursSinceCheck = Math.max((now.getTime() - lastCheck.getTime()) / (1000 * 60 * 60), 0);
 
-    // Hydration reminders
     if (hoursSinceCheck > 1) {
       reminders.push('💧 Time to hydrate! Drink some water to stay focused.');
     }
 
-    // Eye strain reminders
     if (hoursSinceCheck > 0.5) {
       reminders.push('👀 Give your eyes a break! Look at something 20 feet away for 20 seconds.');
     }
 
-    // Posture reminders
     if (hoursSinceCheck > 0.75) {
       reminders.push('🧘 Check your posture! Sit up straight and stretch your shoulders.');
     }
 
-    // Stress level warnings
     if (wellnessData.stressLevel > 7) {
       reminders.push('😌 Your stress levels seem high. Consider taking a longer break or trying some breathing exercises.');
     }
 
-    // Sleep reminders
     if (wellnessData.sleepHours < 7) {
       reminders.push('😴 You might need more sleep. Good rest improves focus and memory!');
     }
@@ -74,7 +85,7 @@ export class WellnessManager {
           'Exhale through your mouth for 8 counts',
           'Repeat 3-4 times'
         ],
-        duration: 2 // minutes
+        duration: 2
       },
       {
         name: 'Box Breathing',
@@ -108,24 +119,12 @@ export class WellnessManager {
     currentData: WellnessData,
     action: 'hydration' | 'eye-break' | 'posture-check' | 'stress-check'
   ): WellnessData {
-    const updated = { ...currentData };
-    updated.lastWellnessCheck = new Date().toISOString();
-
-    switch (action) {
-      case 'hydration':
-        updated.hydrationReminders += 1;
-        break;
-      case 'eye-break':
-        updated.eyeStrainBreaks += 1;
-        break;
-      case 'posture-check':
-        // Could track posture checks if needed
-        break;
-      case 'stress-check':
-        // Stress level would be recalculated based on recent mood data
-        break;
-    }
-
-    return updated;
+    // Return a new immutable object instead of mutating a spread copy
+    return {
+      ...currentData,
+      lastWellnessCheck: new Date().toISOString(),
+      hydrationReminders: action === 'hydration' ? currentData.hydrationReminders + 1 : currentData.hydrationReminders,
+      eyeStrainBreaks: action === 'eye-break' ? currentData.eyeStrainBreaks + 1 : currentData.eyeStrainBreaks
+    };
   }
 }
