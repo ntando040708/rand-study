@@ -311,8 +311,12 @@ export class ThemeManager {
       document.body.classList.remove('dark-theme');
     }
     
-    // Store theme preference
-    localStorage.setItem(this.THEME_STORAGE_KEY, JSON.stringify(theme));
+    // Safely store theme preference
+    try {
+      localStorage.setItem(this.THEME_STORAGE_KEY, JSON.stringify(theme));
+    } catch (error) {
+      console.warn('Could not save theme to local storage', error);
+    }
   }
 
   static getStoredTheme(): ThemeConfig | null {
@@ -328,7 +332,8 @@ export class ThemeManager {
     baseName: string,
     customizations: Partial<ThemeConfig>
   ): ThemeConfig {
-    const baseTheme = this.PREDEFINED_THEMES[baseName] || this.PREDEFINED_THEMES['orange-energy'];
+    // Fall back to a known, guaranteed theme to prevent undefined crashes
+    const baseTheme = this.PREDEFINED_THEMES[baseName] || this.PREDEFINED_THEMES['ocean-blue'];
     
     return {
       ...baseTheme,
@@ -336,22 +341,20 @@ export class ThemeManager {
       name: customizations.name || `Custom ${baseTheme.name}`,
       colorScheme: {
         ...baseTheme.colorScheme,
-        ...customizations.colorScheme
+        ...(customizations.colorScheme || {})
       },
       layout: {
         ...baseTheme.layout,
-        ...customizations.layout
+        ...(customizations.layout || {})
       },
       customizations: {
         ...baseTheme.customizations,
-        ...customizations.customizations
+        ...(customizations.customizations || {})
       }
     };
   }
 
   static generateColorPalette(primaryColor: string): Partial<ColorScheme> {
-    // Simple color palette generation based on primary color
-    // In a real app, you'd use a more sophisticated color theory algorithm
     const hsl = this.hexToHsl(primaryColor);
     
     return {
@@ -365,9 +368,15 @@ export class ThemeManager {
   }
 
   private static hexToHsl(hex: string): { h: number; s: number; l: number } {
-    const r = parseInt(hex.slice(1, 3), 16) / 255;
-    const g = parseInt(hex.slice(3, 5), 16) / 255;
-    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    // Normalize 3-digit hex codes to 6-digit before parsing
+    let normalizedHex = hex;
+    if (hex.length === 4) {
+      normalizedHex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
+    }
+
+    const r = parseInt(normalizedHex.slice(1, 3), 16) / 255;
+    const g = parseInt(normalizedHex.slice(3, 5), 16) / 255;
+    const b = parseInt(normalizedHex.slice(5, 7), 16) / 255;
 
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
@@ -417,10 +426,10 @@ export class ThemeManager {
     }
 
     const toHex = (c: number) => {
-      const hex = Math.round(c * 255).toString(16);
-      return hex.length === 1 ? '0' + hex : hex;
+      const hexString = Math.round(c * 255).toString(16);
+      return hexString.length === 1 ? '0' + hexString : hexString;
     };
 
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
   }
 }
