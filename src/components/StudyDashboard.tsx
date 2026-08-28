@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Play, Pause, SkipForward, TrendingUp, Clock, Calendar, Settings, Brain, Target, Lightbulb, Bell, Trophy, CalendarDays } from 'lucide-react';
 import { StudySession, Module, User, MoodEntry, StudyInsight, Notification, Achievement, StudyGoal } from '../utils/types';
 import { StudyAnalytics } from '../utils/analytics';
 import { NotificationCenter } from './NotificationCenter';
 import { GoalsPanel } from './GoalsPanel';
+
+const UPCOMING_SESSIONS_LIMIT = 4;
 
 interface StudyDashboardProps {
   user: User;
@@ -79,13 +81,14 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
     return modules.find(m => m.id === moduleId);
   };
 
-  const completedSessions = sessions.filter(s => s.completed).length;
+  // Performance Optimization: Memoized derived state to prevent re-calculation on every tick
+  const completedSessions = useMemo(() => sessions.filter(s => s.completed).length, [sessions]);
   const totalSessions = sessions.length;
-  const progressPercentage = totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0;
-  const weeklyStats = StudyAnalytics.getWeeklyStats(moodEntries, sessions, modules);
+  const progressPercentage = useMemo(() => totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0, [completedSessions, totalSessions]);
+  const weeklyStats = useMemo(() => StudyAnalytics.getWeeklyStats(moodEntries, sessions, modules), [moodEntries, sessions, modules]);
 
-  const currentSession = sessions.find(s => !s.completed);
-  const upcomingSessions = sessions.filter(s => !s.completed).slice(1, 4);
+  const currentSession = useMemo(() => sessions.find(s => !s.completed), [sessions]);
+  const upcomingSessions = useMemo(() => sessions.filter(s => !s.completed).slice(1, UPCOMING_SESSIONS_LIMIT), [sessions]);
 
   const startSession = (sessionId: string) => {
     setActiveSession(sessionId);
@@ -96,7 +99,7 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
     setActiveSession(null);
   };
 
-  const unreadNotifications = notifications.filter(n => !n.read).length;
+  const unreadNotifications = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
 
   const completeCurrentSession = () => {
     if (currentSession) {
@@ -124,7 +127,7 @@ export const StudyDashboard: React.FC<StudyDashboardProps> = ({
               Welcome back, {user.name}!
             </h1>
             <p className="text-gray-600">
-              {new Date().toLocaleDateString('en-US', { 
+              {currentTime.toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
