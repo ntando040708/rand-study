@@ -1,3 +1,9 @@
+// Extracted Union Types for Reusability and DRY Code
+export type ScreenType = 'welcome' | 'auth' | 'modules' | 'dashboard' | 'break' | 'mood' | 'settings' | 'analytics' | 'social' | 'wellness' | 'calendar';
+export type PriorityLevel = 'low' | 'medium' | 'high';
+export type CalendarProvider = 'google' | 'outlook' | 'apple' | 'ical';
+export type ThemeMode = 'light' | 'dark' | 'auto';
+
 export interface User {
   id: string;
   name: string;
@@ -52,8 +58,7 @@ export interface AppState {
   isOnBreak: boolean;
   breakTimeLeft: number;
   moodEntries: MoodEntry[];
-  currentScreen: 'welcome' | 'auth' | 'modules' | 'dashboard' | 'break' | 'mood' | 'settings' | 'analytics' | 'social' | 'wellness';
-  currentScreen: 'welcome' | 'auth' | 'modules' | 'dashboard' | 'break' | 'mood' | 'settings' | 'analytics' | 'social' | 'wellness' | 'calendar';
+  currentScreen: ScreenType; // Fixed duplicate identifier
   isLoginMode?: boolean;
   notifications: Notification[];
   achievements: Achievement[];
@@ -78,7 +83,7 @@ export interface StudyInsight {
   title: string;
   description: string;
   actionable: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: PriorityLevel;
 }
 
 export interface Notification {
@@ -117,12 +122,12 @@ export interface ExternalIntegration {
   name: string;
   type: 'calendar' | 'notes' | 'flashcards' | 'lms';
   isConnected: boolean;
-  settings: any;
+  settings: Record<string, unknown>; // Fixed 'any' type for strict enterprise standards
 }
 
 export interface CalendarIntegration {
   id: string;
-  provider: 'google' | 'outlook' | 'apple' | 'ical';
+  provider: CalendarProvider;
   name: string;
   email: string;
   isConnected: boolean;
@@ -162,7 +167,7 @@ export interface CalendarConflict {
   id: string;
   studySessionId: string;
   conflictingEvent: CalendarEvent;
-  suggestedResolution: 'reschedule' | 'shorten' | 'skip';
+  suggestResolution: 'reschedule' | 'shorten' | 'skip';
   alternativeSlots: string[];
 }
 
@@ -182,7 +187,7 @@ export interface AppSettings {
 
 export interface ThemeConfig {
   name: string;
-  mode: 'light' | 'dark' | 'auto';
+  mode: ThemeMode;
   colorScheme: ColorScheme;
   layout: LayoutConfig;
   customizations: ThemeCustomizations;
@@ -216,4 +221,8 @@ export interface ThemeCustomizations {
   moduleColorOverrides: { [moduleId: string]: string };
 }
 
+// Placeholder to close the interface cleanly based on your cut-off snippet
 export interface StudySoundSettings {
+  enabled: boolean;
+  volume: number;
+}
