@@ -11,21 +11,10 @@ import { CalendarSyncPanel } from './components/CalendarSyncPanel';
 import { ThemeManager } from './utils/themes';
 import { storage } from './utils/storage';
 import { generateDailySchedule } from './utils/scheduleGenerator';
-import { User, Module, StudySession, MoodEntry, AppState, Notification, Achievement, StudyGoal, CalendarIntegration } from './utils/types';
+import { User, Module, StudySession, MoodEntry, AppState, CalendarIntegration, AppSettings } from './utils/types';
 import { NotificationManager, GoalManager } from './utils/notifications';
 
 function App() {
-  // Initialize theme on app start
-  useEffect(() => {
-    const storedTheme = ThemeManager.getStoredTheme();
-    if (storedTheme) {
-      ThemeManager.applyTheme(storedTheme);
-    } else {
-      // Apply default theme
-      ThemeManager.applyTheme(ThemeManager.PREDEFINED_THEMES['ocean-blue']);
-    }
-  }, []);
-
   const [appState, setAppState] = useState<AppState>({
     user: null,
     modules: [],
@@ -38,12 +27,26 @@ function App() {
     notifications: [],
     achievements: [],
     goals: [],
-    settings: {},
+    settings: {
+      notifications: true,
+      sessionReminders: true,
+      breakReminders: true,
+      soundEnabled: true,
+      defaultSessionLength: 25,
+      defaultBreakLength: 5
+    },
     calendarIntegrations: []
   });
 
-  // Initialize app state from localStorage
+  // Initialize theme and hydrate state safely on mount
   useEffect(() => {
+    const storedTheme = ThemeManager.getStoredTheme();
+    if (storedTheme) {
+      ThemeManager.applyTheme(storedTheme);
+    } else {
+      ThemeManager.applyTheme(ThemeManager.PREDEFINED_THEMES['ocean-blue']);
+    }
+
     const user = storage.getUser();
     const modules = storage.getModules();
     const moodEntries = storage.getMoodEntries();
@@ -55,7 +58,6 @@ function App() {
     const today = new Date().toISOString().split('T')[0];
     const todaysSessions = storage.getSessions(today);
 
-    // Initialize default goals if none exist
     let initialGoals = goals;
     if (goals.length === 0 && user) {
       initialGoals = GoalManager.createDefaultGoals();
@@ -63,7 +65,6 @@ function App() {
     }
 
     if (user && modules.length > 0) {
-      // Update goal progress
       const updatedGoals = GoalManager.updateGoalProgress(initialGoals, user, todaysSessions);
       if (JSON.stringify(updatedGoals) !== JSON.stringify(initialGoals)) {
         storage.setGoals(updatedGoals);
@@ -77,7 +78,7 @@ function App() {
         notifications,
         achievements,
         goals: updatedGoals,
-        settings,
+        settings: Object.keys(settings).length > 0 ? settings : prev.settings,
         calendarIntegrations,
         todaysSessions: todaysSessions.length > 0 ? todaysSessions : generateDailySchedule(modules),
         currentScreen: 'dashboard'
@@ -91,7 +92,7 @@ function App() {
         notifications,
         achievements,
         goals: initialGoals,
-        settings,
+        settings: Object.keys(settings).length > 0 ? settings : prev.settings,
         calendarIntegrations,
         currentScreen: 'modules'
       }));
@@ -100,11 +101,7 @@ function App() {
 
   const handleAuth = (user: User) => {
     storage.setUser(user);
-    setAppState(prev => ({
-      ...prev,
-      user,
-      currentScreen: 'modules'
-    }));
+    setAppState(prev => ({ ...prev, user, currentScreen: 'modules' }));
   };
 
   const handleModulesComplete = (modules: Module[]) => {
@@ -126,25 +123,17 @@ function App() {
       ...prev,
       currentSession: session,
       isOnBreak: true,
-      breakTimeLeft: 600, // 10 minutes
+      breakTimeLeft: 600,
       currentScreen: 'break'
     }));
   };
 
   const handleCompleteBreak = () => {
-    setAppState(prev => ({
-      ...prev,
-      isOnBreak: false,
-      currentScreen: 'dashboard'
-    }));
+    setAppState(prev => ({ ...prev, isOnBreak: false, currentScreen: 'dashboard' }));
   };
 
   const handleSkipBreak = () => {
-    setAppState(prev => ({
-      ...prev,
-      isOnBreak: false,
-      currentScreen: 'dashboard'
-    }));
+    setAppState(prev => ({ ...prev, isOnBreak: false, currentScreen: 'dashboard' }));
   };
 
   const handleCompleteSession = (sessionId: string) => {
@@ -155,7 +144,6 @@ function App() {
     const today = new Date().toISOString().split('T')[0];
     storage.setSessions(today, updatedSessions);
 
-    // Update user stats
     const updatedUser = {
       ...appState.user!,
       totalSessions: appState.user!.totalSessions + 1,
@@ -163,32 +151,26 @@ function App() {
     };
     storage.setUser(updatedUser);
 
-    // Check for new achievements
     const newAchievements = NotificationManager.checkForAchievements(
       updatedUser, 
       updatedSessions, 
       appState.moodEntries
     );
 
+    let updatedAchievements = appState.achievements;
+    let updatedNotifications = appState.notifications;
+
     if (newAchievements.length > 0) {
-      const updatedAchievements = [...appState.achievements, ...newAchievements];
+      updatedAchievements = [...appState.achievements, ...newAchievements];
       storage.setAchievements(updatedAchievements);
 
-      // Create achievement notifications
       const achievementNotifications = newAchievements.map(achievement =>
         NotificationManager.createAchievementNotification(achievement)
       );
-      const updatedNotifications = [...appState.notifications, ...achievementNotifications];
+      updatedNotifications = [...appState.notifications, ...achievementNotifications];
       storage.setNotifications(updatedNotifications);
-
-      setAppState(prev => ({
-        ...prev,
-        achievements: updatedAchievements,
-        notifications: updatedNotifications
-      }));
     }
 
-    // Update goals progress
     const updatedGoals = GoalManager.updateGoalProgress(appState.goals, updatedUser, updatedSessions);
     storage.setGoals(updatedGoals);
 
@@ -197,7 +179,9 @@ function App() {
       user: updatedUser,
       todaysSessions: updatedSessions,
       currentSession: null,
-      goals: updatedGoals
+      goals: updatedGoals,
+      achievements: updatedAchievements,
+      notifications: updatedNotifications
     }));
   };
 
@@ -216,11 +200,7 @@ function App() {
     const updatedMoodEntries = [...appState.moodEntries, moodEntry];
     storage.setMoodEntries(updatedMoodEntries);
 
-    setAppState(prev => ({
-      ...prev,
-      moodEntries: updatedMoodEntries,
-      currentScreen: 'dashboard'
-    }));
+    setAppState(prev => ({ ...prev, moodEntries: updatedMoodEntries, currentScreen: 'dashboard' }));
   };
 
   const handleMarkNotificationRead = (notificationId: string) => {
@@ -231,13 +211,13 @@ function App() {
     setAppState(prev => ({ ...prev, notifications: updatedNotifications }));
   };
 
-  const handleClearNotifications = () => {
+    const handleClearNotifications = () => {
     const updatedNotifications = appState.notifications.map(n => ({ ...n, read: true }));
     storage.setNotifications(updatedNotifications);
     setAppState(prev => ({ ...prev, notifications: updatedNotifications }));
   };
 
-  const handleUpdateSettings = (newSettings: any) => {
+  const handleUpdateSettings = (newSettings: AppSettings) => {
     storage.setSettings(newSettings);
     setAppState(prev => ({ ...prev, settings: newSettings }));
   };
@@ -247,69 +227,28 @@ function App() {
     setAppState(prev => ({ ...prev, calendarIntegrations: integrations }));
   };
 
-  const navigateToWelcome = () => {
-    setAppState(prev => ({ ...prev, currentScreen: 'welcome' }));
-  };
+  const navigateToWelcome = () => setAppState(prev => ({ ...prev, currentScreen: 'welcome' }));
+  const navigateToAuth = (isLogin: boolean = false) => setAppState(prev => ({ ...prev, currentScreen: 'auth', isLoginMode: isLogin }));
+  const navigateToModules = () => setAppState(prev => ({ ...prev, currentScreen: 'modules' }));
+  const navigateToMood = () => setAppState(prev => ({ ...prev, currentScreen: 'mood' }));
+  const navigateToDashboard = () => setAppState(prev => ({ ...prev, currentScreen: 'dashboard' }));
+  const navigateToSettings = () => setAppState(prev => ({ ...prev, currentScreen: 'settings' }));
+  const navigateToCalendar = () => setAppState(prev => ({ ...prev, currentScreen: 'calendar' }));
 
-  const navigateToAuth = (isLogin: boolean = false) => {
-    setAppState(prev => ({ 
-      ...prev, 
-      currentScreen: 'auth',
-      isLoginMode: isLogin 
-    }));
-  };
-
-  const navigateToModules = () => {
-    setAppState(prev => ({ ...prev, currentScreen: 'modules' }));
-  };
-
-  const navigateToMood = () => {
-    setAppState(prev => ({ ...prev, currentScreen: 'mood' }));
-  };
-
-  const navigateToDashboard = () => {
-    setAppState(prev => ({ ...prev, currentScreen: 'dashboard' }));
-  };
-
-  const navigateToSettings = () => {
-    setAppState(prev => ({ ...prev, currentScreen: 'settings' }));
-  };
-
-  const navigateToCalendar = () => {
-    setAppState(prev => ({ ...prev, currentScreen: 'calendar' }));
-  };
-
-  // Render current screen
   switch (appState.currentScreen) {
     case 'welcome':
-      return (
-        <WelcomeScreen
-          onGetStarted={() => navigateToAuth(false)}
-          onLogin={() => navigateToAuth(true)}
-        />
-      );
-
+      return <WelcomeScreen onGetStarted={() => navigateToAuth(false)} onLogin={() => navigateToAuth(true)} />;
     case 'auth':
       return (
         <AuthScreen
           isLogin={appState.isLoginMode || false}
           onAuth={handleAuth}
           onBack={navigateToWelcome}
-          onToggleMode={() => setAppState(prev => ({ 
-            ...prev, 
-            isLoginMode: !prev.isLoginMode 
-          }))}
+          onToggleMode={() => setAppState(prev => ({ ...prev, isLoginMode: !prev.isLoginMode }))}
         />
       );
-
     case 'modules':
-      return (
-        <ModuleEntry
-          onComplete={handleModulesComplete}
-          existingModules={appState.modules}
-        />
-      );
-
+      return <ModuleEntry onComplete={handleModulesComplete} existingModules={appState.modules} />;
     case 'dashboard':
       return (
         <StudyDashboard
@@ -330,7 +269,6 @@ function App() {
           onOpenCalendar={navigateToCalendar}
         />
       );
-
     case 'break':
       return (
         <BreakScreen
@@ -340,7 +278,6 @@ function App() {
           onSkipBreak={handleSkipBreak}
         />
       );
-
     case 'mood':
       return (
         <MoodTracker
@@ -351,7 +288,6 @@ function App() {
           onBack={navigateToDashboard}
         />
       );
-
     case 'settings':
       return (
         <SettingsPanel
@@ -360,16 +296,12 @@ function App() {
           onBack={navigateToDashboard}
         />
       );
-
     case 'calendar':
       return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 p-6">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center mb-8">
-              <button
-                onClick={navigateToDashboard}
-                className="mr-4 p-2 text-gray-600 hover:text-gray-900 transition-colors"
-              >
+              <button onClick={navigateToDashboard} className="mr-4 p-2 text-gray-600 hover:text-gray-900 transition-colors">
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <div>
@@ -377,7 +309,6 @@ function App() {
                 <p className="text-gray-600">Sync your study sessions with your calendar</p>
               </div>
             </div>
-            
             <CalendarSyncPanel
               integrations={appState.calendarIntegrations}
               sessions={appState.todaysSessions}
@@ -387,14 +318,8 @@ function App() {
           </div>
         </div>
       );
-
     default:
-      return (
-        <WelcomeScreen
-          onGetStarted={() => navigateToAuth(false)}
-          onLogin={() => navigateToAuth(true)}
-        />
-      );
+      return <WelcomeScreen onGetStarted={() => navigateToAuth(false)} onLogin={() => navigateToAuth(true)} />;
   }
 }
 
