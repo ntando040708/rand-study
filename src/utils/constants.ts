@@ -1,6 +1,6 @@
 import { BreakSuggestion } from './types';
 
-export const BREAK_SUGGESTIONS: BreakSuggestion[] = [
+export const BREAK_SUGGESTIONS: ReadonlyArray<BreakSuggestion> = [
   {
     id: '1',
     title: 'Take a Walk',
@@ -38,12 +38,13 @@ export const BREAK_SUGGESTIONS: BreakSuggestion[] = [
   }
 ];
 
+// 'as const' locks these down as readonly literal tuples
 export const MODULE_COLORS = [
   '#3B82F6', '#1E40AF', '#06B6D4', '#0EA5E9', 
   '#60A5FA', '#1E293B', '#475569', '#64748B'
-];
+] as const;
 
-export const MOOD_EMOJIS = ['😡', '😕', '😐', '🙂', '😁'];
+export const MOOD_EMOJIS = ['😡', '😕', '😐', '🙂', '😁'] as const;
 
 export const MOTIVATIONAL_QUOTES = [
   "Focus on progress, not perfection.",
@@ -51,4 +52,4 @@ export const MOTIVATIONAL_QUOTES = [
   "Success is the sum of small efforts repeated daily.",
   "The future belongs to those who prepare today.",
   "Learning never exhausts the mind."
-];
+] as const;
