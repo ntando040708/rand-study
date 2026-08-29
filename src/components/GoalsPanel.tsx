@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Target, Calendar, Clock, TrendingUp, CheckCircle } from 'lucide-react';
 import { StudyGoal } from '../utils/types';
 
@@ -24,8 +24,16 @@ export const GoalsPanel: React.FC<GoalsPanelProps> = ({ goals, onCreateGoal }) =
     return 'bg-gray-400';
   };
 
-  const activeGoals = goals.filter(g => !g.completed);
-  const completedGoals = goals.filter(g => g.completed);
+  // Memoize filters to prevent unnecessary recalculations on unrelated re-renders
+  const activeGoals = useMemo(() => goals.filter(g => !g.completed), [goals]);
+  const completedGoals = useMemo(() => goals.filter(g => g.completed), [goals]);
+
+  // Calculate "today" once at the start of the render cycle, stripping time for accurate day comparisons
+  const todayMs = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  }, []);
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -50,9 +58,11 @@ export const GoalsPanel: React.FC<GoalsPanelProps> = ({ goals, onCreateGoal }) =
           {activeGoals.map((goal) => {
             const IconComponent = getGoalIcon(goal);
             const progress = Math.min((goal.currentValue / goal.targetValue) * 100, 100);
-            const daysLeft = Math.ceil(
-              (new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-            );
+            
+            // Accurately calculate days remaining
+            const deadlineDate = new Date(goal.deadline);
+            deadlineDate.setHours(0, 0, 0, 0);
+            const daysLeft = Math.ceil((deadlineDate.getTime() - todayMs) / (1000 * 60 * 60 * 24));
 
             return (
               <div key={goal.id} className="p-4 bg-gray-50 rounded-xl">
@@ -71,7 +81,7 @@ export const GoalsPanel: React.FC<GoalsPanelProps> = ({ goals, onCreateGoal }) =
                       {goal.currentValue}/{goal.targetValue} {goal.unit}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {daysLeft > 0 ? `${daysLeft} days left` : 'Overdue'}
+                      {daysLeft > 0 ? `${daysLeft} days left` : daysLeft === 0 ? 'Due Today' : 'Overdue'}
                     </p>
                   </div>
                 </div>
