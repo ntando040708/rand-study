@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Settings, Bell, Volume2, Palette, Clock, ArrowLeft, Save, Sparkles } from 'lucide-react';
 import { ThemeCustomizer } from './ThemeCustomizer';
 import { ThemeManager } from '../utils/themes';
-import { ThemeConfig } from '../utils/types';
+import { ThemeConfig, AppSettings } from '../utils/types';
 
 interface SettingsPanelProps {
-  settings: any;
-  onUpdateSettings: (settings: any) => void;
+  settings: AppSettings;
+  onUpdateSettings: (settings: AppSettings) => void;
   onBack: () => void;
 }
 
@@ -15,19 +15,30 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   onUpdateSettings,
   onBack
 }) => {
-  const [localSettings, setLocalSettings] = useState(settings);
+  const [localSettings, setLocalSettings] = useState<AppSettings>(settings);
   const [showThemeCustomizer, setShowThemeCustomizer] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState<ThemeConfig>(ThemeManager.getStoredTheme() || ThemeManager.PREDEFINED_THEMES['modern-light']);
+  
+  // FIX: Use an actual theme that exists in PREDEFINED_THEMES
+  const [currentTheme, setCurrentTheme] = useState<ThemeConfig>(
+    ThemeManager.getStoredTheme() || ThemeManager.PREDEFINED_THEMES['ocean-blue']
+  );
 
   const handleSave = () => {
     onUpdateSettings(localSettings);
     onBack();
   };
 
-  const updateSetting = (key: string, value: any) => {
-    setLocalSettings((prev: any) => ({
+  const updateSetting = (key: keyof AppSettings, value: any) => {
+    setLocalSettings(prev => ({
       ...prev,
       [key]: value
+    }));
+  };
+
+  const toggleSetting = (key: keyof AppSettings) => {
+    setLocalSettings(prev => ({
+      ...prev,
+      [key]: !prev[key]
     }));
   };
 
@@ -72,7 +83,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <input
                     type="checkbox"
                     checked={localSettings.notifications}
-                    onChange={(e) => updateSetting('notifications', e.target.checked)}
+                    onChange={() => toggleSetting('notifications')}
                     className="sr-only peer"
                   />
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -88,7 +99,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <input
                     type="checkbox"
                     checked={localSettings.sessionReminders}
-                    onChange={(e) => updateSetting('sessionReminders', e.target.checked)}
+                    onChange={() => toggleSetting('sessionReminders')}
                     className="sr-only peer"
                   />
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -104,7 +115,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <input
                     type="checkbox"
                     checked={localSettings.breakReminders}
-                    onChange={(e) => updateSetting('breakReminders', e.target.checked)}
+                    onChange={() => toggleSetting('breakReminders')}
                     className="sr-only peer"
                   />
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -129,7 +140,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 <input
                   type="checkbox"
                   checked={localSettings.soundEnabled}
-                  onChange={(e) => updateSetting('soundEnabled', e.target.checked)}
+                  onChange={() => toggleSetting('soundEnabled')}
                   className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
@@ -191,18 +202,20 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-medium text-gray-900">Current Theme</h4>
-                  <p className="text-sm text-gray-600">{currentTheme.name}</p>
+                  <p className="text-sm text-gray-600">{currentTheme?.name || 'Loading...'}</p>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <div 
-                    className="w-8 h-8 rounded-full border-2 border-gray-300"
-                    style={{ backgroundColor: currentTheme.colorScheme.primary }}
-                  />
-                  <div 
-                    className="w-8 h-8 rounded-full border-2 border-gray-300"
-                    style={{ backgroundColor: currentTheme.colorScheme.secondary }}
-                  />
-                </div>
+                {currentTheme && (
+                  <div className="flex items-center space-x-2">
+                    <div 
+                      className="w-8 h-8 rounded-full border-2 border-gray-300"
+                      style={{ backgroundColor: currentTheme.colorScheme.primary }}
+                    />
+                    <div 
+                      className="w-8 h-8 rounded-full border-2 border-gray-300"
+                      style={{ backgroundColor: currentTheme.colorScheme.secondary }}
+                    />
+                  </div>
+                )}
               </div>
               
               <button
@@ -219,7 +232,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     key={key}
                     onClick={() => handleThemeChange(theme)}
                     className={`p-3 rounded-lg border-2 transition-all ${
-                      currentTheme.name === theme.name
+                      currentTheme?.name === theme.name
                         ? 'border-purple-500 bg-purple-50'
                         : 'border-gray-200 hover:border-orange-300'
                     }`}
@@ -249,7 +262,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
       </div>
       
       {/* Theme Customizer Modal */}
-      {showThemeCustomizer && (
+      {showThemeCustomizer && currentTheme && (
         <ThemeCustomizer
           currentTheme={currentTheme}
           onThemeChange={handleThemeChange}
