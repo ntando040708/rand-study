@@ -94,7 +94,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                     className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      autoComplete="name"
+                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       placeholder="Enter your full name"
                       required={!isLogin}
                     />
@@ -113,7 +114,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                    autoComplete="email"
+                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="Enter your email"
                     required
                   />
@@ -131,6 +133,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
+                    autoComplete={isLogin ? 'current-password' : 'new-password'}
                     className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="Enter your password"
                     required
