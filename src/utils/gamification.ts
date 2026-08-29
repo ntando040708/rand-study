@@ -26,72 +26,86 @@ export class GamificationEngine {
   }
 
   static generateDailyChallenges(): Challenge[] {
-    const today = new Date().toISOString().split('T')[0];
+    const todayStr = new Date().toISOString().split('T')[0];
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
+    const deadlineStr = tomorrow.toISOString();
 
     return [
       {
-        id: `daily-sessions-${today}`,
+        id: `daily-sessions-${todayStr}`, // Deterministic ID
         title: 'Study Warrior',
         description: 'Complete 5 study sessions today',
         type: 'daily',
         target: 5,
         progress: 0,
         reward: '50 XP + Focus Badge',
-        deadline: tomorrow.toISOString(),
+        deadline: deadlineStr,
         completed: false
       },
       {
-        id: `daily-streak-${today}`,
+        id: `daily-streak-${todayStr}`,
         title: 'Consistency Champion',
         description: 'Maintain your study streak',
         type: 'daily',
         target: 1,
         progress: 0,
         reward: '25 XP + Streak Multiplier',
-        deadline: tomorrow.toISOString(),
+        deadline: deadlineStr,
         completed: false
       },
       {
-        id: `daily-mood-${today}`,
+        id: `daily-mood-${todayStr}`,
         title: 'Positive Vibes',
         description: 'Log a mood rating of 4 or higher',
         type: 'daily',
         target: 1,
         progress: 0,
         reward: '30 XP + Happiness Badge',
-        deadline: tomorrow.toISOString(),
+        deadline: deadlineStr,
         completed: false
       }
     ];
   }
 
   static generateWeeklyChallenges(): Challenge[] {
-    const nextWeek = new Date();
-    nextWeek.setDate(nextWeek.getDate() + 7);
+    const today = new Date();
+    // Get a deterministic string for the current week (e.g., "2026-W35")
+    const getWeekNumber = (d: Date) => {
+      const date = new Date(d.getTime());
+      date.setHours(0, 0, 0, 0);
+      date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+      const week1 = new Date(date.getFullYear(), 0, 4);
+      return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+    };
+    
+    const weekId = `${today.getFullYear()}-W${getWeekNumber(today)}`;
+    
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+    const deadlineStr = nextWeek.toISOString();
 
     return [
       {
-        id: `weekly-hours-${Date.now()}`,
+        id: `weekly-hours-${weekId}`, // Deterministic ID based on calendar week
         title: 'Study Marathon',
         description: 'Study for 20 hours this week',
         type: 'weekly',
         target: 1200, // minutes
         progress: 0,
         reward: '200 XP + Marathon Badge',
-        deadline: nextWeek.toISOString(),
+        deadline: deadlineStr,
         completed: false
       },
       {
-        id: `weekly-modules-${Date.now()}`,
+        id: `weekly-modules-${weekId}`,
         title: 'Subject Master',
         description: 'Study all your modules this week',
         type: 'weekly',
-        target: 1, // will be set based on user modules
+        target: 1, 
         progress: 0,
         reward: '150 XP + Versatility Badge',
-        deadline: nextWeek.toISOString(),
+        deadline: deadlineStr,
         completed: false
       }
     ];
@@ -106,110 +120,12 @@ export class GamificationEngine {
 
     if (completed && !challenge.completed) {
       switch (challenge.type) {
-        case 'daily':
-          xpReward = 50;
-          break;
-        case 'weekly':
-          xpReward = 200;
-          break;
-        case 'monthly':
-          xpReward = 500;
-          break;
+        case 'daily': xpReward = 50; break;
+        case 'weekly': xpReward = 200; break;
+        case 'monthly': xpReward = 500; break;
       }
     }
 
     return { completed, xpReward };
-  }
-
-  static generateAchievements(): Achievement[] {
-    return [
-      // Streak Achievements
-      {
-        id: 'first-week',
-        title: 'Week Warrior',
-        description: 'Maintain a 7-day study streak',
-        icon: 'Flame',
-        unlockedAt: '',
-        category: 'streak'
-      },
-      {
-        id: 'month-master',
-        title: 'Month Master',
-        description: 'Incredible 30-day study streak!',
-        icon: 'Crown',
-        unlockedAt: '',
-        category: 'streak'
-      },
-      {
-        id: 'century-streak',
-        title: 'Centurion',
-        description: '100-day study streak achieved!',
-        icon: 'Trophy',
-        unlockedAt: '',
-        category: 'streak'
-      },
-
-      // Session Achievements
-      {
-        id: 'first-session',
-        title: 'Getting Started',
-        description: 'Complete your first study session',
-        icon: 'Play',
-        unlockedAt: '',
-        category: 'sessions'
-      },
-      {
-        id: 'hundred-sessions',
-        title: 'Century Club',
-        description: 'Complete 100 study sessions',
-        icon: 'Target',
-        unlockedAt: '',
-        category: 'sessions'
-      },
-      {
-        id: 'thousand-sessions',
-        title: 'Study Legend',
-        description: '1000 study sessions completed!',
-        icon: 'Crown',
-        unlockedAt: '',
-        category: 'sessions'
-      },
-
-      // Time Achievements
-      {
-        id: 'ten-hours',
-        title: 'Time Keeper',
-        description: 'Study for 10 hours total',
-        icon: 'Clock',
-        unlockedAt: '',
-        category: 'time'
-      },
-      {
-        id: 'hundred-hours',
-        title: 'Dedicated Scholar',
-        description: '100 hours of focused study',
-        icon: 'BookOpen',
-        unlockedAt: '',
-        category: 'time'
-      },
-
-      // Mood Achievements
-      {
-        id: 'positive-week',
-        title: 'Positive Vibes',
-        description: 'Maintain high mood for a week',
-        icon: 'Heart',
-        unlockedAt: '',
-        category: 'mood'
-      },
-      {
-        id: 'mood-tracker',
-        title: 'Self-Aware',
-        description: 'Log 50 mood entries',
-        icon: 'Brain',
-        unlockedAt: '',
-        category: 'mood'
-      }
-    ];
   }
 }
