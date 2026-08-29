@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Calendar, Plus, Settings, RefreshCw, AlertTriangle, Check, X, Clock, ExternalLink } from 'lucide-react';
 import { CalendarIntegration, CalendarConflict, StudySession, Module } from '../utils/types';
 import { CalendarSyncManager } from '../utils/calendarSync';
@@ -22,12 +22,18 @@ export const CalendarSyncPanel: React.FC<CalendarSyncPanelProps> = ({
   const [selectedIntegration, setSelectedIntegration] = useState<CalendarIntegration | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [syncResults, setSyncResults] = useState<{ success: number; failed: number } | null>(null);
+  
+  // Track component mount status to prevent memory leak warnings on async state updates
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    checkForConflicts();
-  }, [integrations, sessions]);
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
-  const checkForConflicts = async () => {
+  // Stabilize async function reference
+  const checkForConflicts = useCallback(async () => {
     const allConflicts: CalendarConflict[] = [];
     
     for (const integration of integrations.filter(i => i.isConnected && i.syncEnabled)) {
@@ -35,8 +41,14 @@ export const CalendarSyncPanel: React.FC<CalendarSyncPanelProps> = ({
       allConflicts.push(...integrationConflicts);
     }
     
-    setConflicts(allConflicts);
-  };
+    if (isMounted.current) {
+      setConflicts(allConflicts);
+    }
+  }, [integrations, sessions]);
+
+  useEffect(() => {
+    checkForConflicts();
+  }, [checkForConflicts]);
 
   const connectCalendar = async (provider: 'google' | 'outlook') => {
     setIsConnecting(true);
@@ -50,21 +62,21 @@ export const CalendarSyncPanel: React.FC<CalendarSyncPanelProps> = ({
         newIntegration = await CalendarSyncManager.connectOutlookCalendar();
       }
       
-      if (newIntegration) {
+      if (newIntegration && isMounted.current) {
         const updatedIntegrations = [...integrations, newIntegration];
         onUpdateIntegrations(updatedIntegrations);
       }
     } catch (error) {
       console.error('Calendar connection failed:', error);
     } finally {
-      setIsConnecting(false);
+      if (isMounted.current) setIsConnecting(false);
     }
   };
 
   const disconnectCalendar = async (integration: CalendarIntegration) => {
     const success = await CalendarSyncManager.disconnectCalendar(integration);
     
-    if (success) {
+    if (success && isMounted.current) {
       const updatedIntegrations = integrations.filter(i => i.id !== integration.id);
       onUpdateIntegrations(updatedIntegrations);
     }
@@ -75,20 +87,21 @@ export const CalendarSyncPanel: React.FC<CalendarSyncPanelProps> = ({
     
     try {
       const results = await CalendarSyncManager.syncStudySessions(integration, sessions, modules);
-      setSyncResults(results);
       
-      // Update integration last sync time
-      const updatedIntegrations = integrations.map(i => 
-        i.id === integration.id ? { ...i, lastSync: new Date().toISOString() } : i
-      );
-      onUpdateIntegrations(updatedIntegrations);
+      if (isMounted.current) {
+        setSyncResults(results);
+        
+        const updatedIntegrations = integrations.map(i => 
+          i.id === integration.id ? { ...i, lastSync: new Date().toISOString() } : i
+        );
+        onUpdateIntegrations(updatedIntegrations);
+      }
       
-      // Recheck conflicts after sync
       await checkForConflicts();
     } catch (error) {
       console.error('Sync failed:', error);
     } finally {
-      setIsSyncing(false);
+      if (isMounted.current) setIsSyncing(false);
     }
   };
 
