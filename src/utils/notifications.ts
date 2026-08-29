@@ -18,7 +18,7 @@ export class NotificationManager {
       id: `break_${Date.now()}`,
       type: 'break',
       title: 'Time for a Break!',
-      message: 'You\'ve been studying for a while. Take a well-deserved break.',
+      message: "You've been studying for a while. Take a well-deserved break.",
       timestamp: new Date().toISOString(),
       read: false,
       actionUrl: '/break'
@@ -39,14 +39,15 @@ export class NotificationManager {
   static checkForAchievements(
     user: User, 
     sessions: StudySession[], 
-    moodEntries: MoodEntry[]
+    moodEntries: MoodEntry[],
+    existingAchievements: Achievement[] = [] // Added to prevent duplicate awards
   ): Achievement[] {
-    const achievements: Achievement[] = [];
-    const completedSessions = sessions.filter(s => s.completed);
+    const newAchievements: Achievement[] = [];
+    const hasAchievement = (id: string) => existingAchievements.some(a => a.id === id);
 
     // Streak achievements
-    if (user.streak === 7) {
-      achievements.push({
+    if (user.streak >= 7 && !hasAchievement('week_streak')) {
+      newAchievements.push({
         id: 'week_streak',
         title: 'Week Warrior',
         description: 'Maintained a 7-day study streak',
@@ -56,8 +57,8 @@ export class NotificationManager {
       });
     }
 
-    if (user.streak === 30) {
-      achievements.push({
+    if (user.streak >= 30 && !hasAchievement('month_master')) {
+      newAchievements.push({
         id: 'month_master',
         title: 'Month Master',
         description: 'Incredible 30-day study streak!',
@@ -68,8 +69,8 @@ export class NotificationManager {
     }
 
     // Session achievements
-    if (user.totalSessions === 10) {
-      achievements.push({
+    if (user.totalSessions >= 10 && !hasAchievement('first_ten')) {
+      newAchievements.push({
         id: 'first_ten',
         title: 'Getting Started',
         description: 'Completed your first 10 study sessions',
@@ -79,8 +80,8 @@ export class NotificationManager {
       });
     }
 
-    if (user.totalSessions === 100) {
-      achievements.push({
+    if (user.totalSessions >= 100 && !hasAchievement('century')) {
+      newAchievements.push({
         id: 'century',
         title: 'Century Club',
         description: 'Completed 100 study sessions!',
@@ -91,21 +92,23 @@ export class NotificationManager {
     }
 
     // Mood achievements
-    const recentMoods = moodEntries.slice(-10);
-    const highMoodCount = recentMoods.filter(m => m.mood >= 4).length;
-    
-    if (highMoodCount >= 8) {
-      achievements.push({
-        id: 'positive_vibes',
-        title: 'Positive Vibes',
-        description: 'Maintained high mood in 8 out of 10 recent sessions',
-        icon: 'Heart',
-        unlockedAt: new Date().toISOString(),
-        category: 'mood'
-      });
+    if (!hasAchievement('positive_vibes')) {
+      const recentMoods = moodEntries.slice(-10);
+      const highMoodCount = recentMoods.filter(m => m.mood >= 4).length;
+      
+      if (highMoodCount >= 8 && recentMoods.length >= 8) {
+        newAchievements.push({
+          id: 'positive_vibes',
+          title: 'Positive Vibes',
+          description: 'Maintained high mood in 8 out of 10 recent sessions',
+          icon: 'Heart',
+          unlockedAt: new Date().toISOString(),
+          category: 'mood'
+        });
+      }
     }
 
-    return achievements;
+    return newAchievements;
   }
 }
 
@@ -154,21 +157,26 @@ export class GoalManager {
     user: User, 
     sessions: StudySession[]
   ): StudyGoal[] {
+    // Optimization: Calculate relative dates once before the loop
+    const now = new Date();
+    
+    const weekAgo = new Date(now);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    
+    const monthAgo = new Date(now);
+    monthAgo.setDate(monthAgo.getDate() - 30);
+
     return goals.map(goal => {
       let currentValue = goal.currentValue;
 
       switch (goal.id) {
         case 'weekly_sessions':
-          const weekAgo = new Date();
-          weekAgo.setDate(weekAgo.getDate() - 7);
           currentValue = sessions.filter(s => 
             s.completed && new Date(s.date) >= weekAgo
           ).length;
           break;
 
         case 'monthly_hours':
-          const monthAgo = new Date();
-          monthAgo.setDate(monthAgo.getDate() - 30);
           currentValue = Math.round(
             sessions
               .filter(s => s.completed && new Date(s.date) >= monthAgo)
