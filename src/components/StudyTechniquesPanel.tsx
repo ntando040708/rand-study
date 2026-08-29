@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Clock, Brain, Repeat, MessageSquare, Settings } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Clock, Brain, Repeat, MessageSquare, Settings, X } from 'lucide-react';
 import { StudyTechnique } from '../utils/types';
-import { StudyTechniqueManager } from '../utils/studyTechniques';
+// Note: StudyTechniqueManager import was unused, so I removed it to pass strict linting
 
 interface StudyTechniquesPanelProps {
   techniques: StudyTechnique[];
@@ -17,6 +17,18 @@ export const StudyTechniquesPanel: React.FC<StudyTechniquesPanelProps> = ({
   const [selectedTechnique, setSelectedTechnique] = useState<StudyTechnique | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
+  // Prevent background scrolling when modal is open
+  useEffect(() => {
+    if (selectedTechnique) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedTechnique]);
+
   const getTechniqueIcon = (type: string) => {
     switch (type) {
       case 'pomodoro': return Clock;
@@ -27,13 +39,29 @@ export const StudyTechniquesPanel: React.FC<StudyTechniquesPanelProps> = ({
     }
   };
 
-  const getTechniqueColor = (type: string) => {
+  // Mapped full class strings to prevent Tailwind purging in production
+  const getThemeClasses = (type: string) => {
     switch (type) {
-      case 'pomodoro': return 'red';
-      case 'spaced-repetition': return 'blue';
-      case 'active-recall': return 'green';
-      case 'feynman': return 'purple';
-      default: return 'gray';
+      case 'pomodoro': return {
+        bg: 'bg-red-50', bgLight: 'bg-red-100', text: 'text-red-800', 
+        textIcon: 'text-red-600', borderActive: 'border-red-500', focusRing: 'peer-focus:ring-red-300', toggleBg: 'peer-checked:bg-red-600'
+      };
+      case 'spaced-repetition': return {
+        bg: 'bg-blue-50', bgLight: 'bg-blue-100', text: 'text-blue-800', 
+        textIcon: 'text-blue-600', borderActive: 'border-blue-500', focusRing: 'peer-focus:ring-blue-300', toggleBg: 'peer-checked:bg-blue-600'
+      };
+      case 'active-recall': return {
+        bg: 'bg-green-50', bgLight: 'bg-green-100', text: 'text-green-800', 
+        textIcon: 'text-green-600', borderActive: 'border-green-500', focusRing: 'peer-focus:ring-green-300', toggleBg: 'peer-checked:bg-green-600'
+      };
+      case 'feynman': return {
+        bg: 'bg-purple-50', bgLight: 'bg-purple-100', text: 'text-purple-800', 
+        textIcon: 'text-purple-600', borderActive: 'border-purple-500', focusRing: 'peer-focus:ring-purple-300', toggleBg: 'peer-checked:bg-purple-600'
+      };
+      default: return {
+        bg: 'bg-gray-50', bgLight: 'bg-gray-100', text: 'text-gray-800', 
+        textIcon: 'text-gray-600', borderActive: 'border-gray-500', focusRing: 'peer-focus:ring-gray-300', toggleBg: 'peer-checked:bg-gray-600'
+      };
     }
   };
 
@@ -62,7 +90,8 @@ export const StudyTechniquesPanel: React.FC<StudyTechniquesPanelProps> = ({
         </h3>
         <button
           onClick={() => setShowSettings(!showSettings)}
-          className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+          className="p-2 text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-100"
+          aria-label="Toggle settings"
         >
           <Settings className="w-4 h-4" />
         </button>
@@ -75,11 +104,11 @@ export const StudyTechniquesPanel: React.FC<StudyTechniquesPanelProps> = ({
           <div className="flex flex-wrap gap-2">
             {activeTechniques.map((technique) => {
               const IconComponent = getTechniqueIcon(technique.type);
-              const color = getTechniqueColor(technique.type);
+              const theme = getThemeClasses(technique.type);
               return (
                 <div
                   key={technique.id}
-                  className={`flex items-center px-3 py-1 bg-${color}-100 text-${color}-800 rounded-full text-sm`}
+                  className={`flex items-center px-3 py-1 ${theme.bgLight} ${theme.text} rounded-full text-sm`}
                 >
                   <IconComponent className="w-4 h-4 mr-1" />
                   {technique.name}
@@ -94,30 +123,30 @@ export const StudyTechniquesPanel: React.FC<StudyTechniquesPanelProps> = ({
       <div className="space-y-4">
         {techniques.map((technique) => {
           const IconComponent = getTechniqueIcon(technique.type);
-          const color = getTechniqueColor(technique.type);
+          const theme = getThemeClasses(technique.type);
 
           return (
             <div
               key={technique.id}
               className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
                 technique.isActive
-                  ? `border-${color}-500 bg-${color}-50`
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? `${theme.borderActive} ${theme.bg}`
+                  : 'border-gray-200 hover:border-gray-300 bg-white'
               }`}
               onClick={() => setSelectedTechnique(technique)}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <div className={`w-12 h-12 bg-${color}-100 rounded-xl flex items-center justify-center mr-4`}>
-                    <IconComponent className={`w-6 h-6 text-${color}-600`} />
+                  <div className={`w-12 h-12 ${theme.bgLight} rounded-xl flex items-center justify-center mr-4 shrink-0`}>
+                    <IconComponent className={`w-6 h-6 ${theme.textIcon}`} />
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-900">{technique.name}</h4>
-                    <p className="text-sm text-gray-600">{technique.description}</p>
+                    <p className="text-sm text-gray-600 line-clamp-2">{technique.description}</p>
                   </div>
                 </div>
                 
-                <label className="relative inline-flex items-center cursor-pointer">
+                <label className="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
                   <input
                     type="checkbox"
                     checked={technique.isActive}
@@ -125,41 +154,41 @@ export const StudyTechniquesPanel: React.FC<StudyTechniquesPanelProps> = ({
                     className="sr-only peer"
                     onClick={(e) => e.stopPropagation()}
                   />
-                  <div className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-${color}-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-${color}-600`}></div>
+                  <div className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 ${theme.focusRing} rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all ${theme.toggleBg}`}></div>
                 </label>
               </div>
 
               {/* Technique-specific info */}
               {technique.isActive && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="mt-4 pt-4 border-t border-gray-200/60">
                   {technique.type === 'pomodoro' && (
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
-                        <span className="text-gray-600">Work:</span>
-                        <span className="font-medium ml-1">{technique.settings.workDuration}min</span>
+                        <span className="text-gray-600 block text-xs uppercase tracking-wider mb-1">Work</span>
+                        <span className="font-medium text-gray-900">{technique.settings.workDuration}m</span>
                       </div>
                       <div>
-                        <span className="text-gray-600">Break:</span>
-                        <span className="font-medium ml-1">{technique.settings.shortBreakDuration}min</span>
+                        <span className="text-gray-600 block text-xs uppercase tracking-wider mb-1">Break</span>
+                        <span className="font-medium text-gray-900">{technique.settings.shortBreakDuration}m</span>
                       </div>
                       <div>
-                        <span className="text-gray-600">Long Break:</span>
-                        <span className="font-medium ml-1">{technique.settings.longBreakDuration}min</span>
+                        <span className="text-gray-600 block text-xs uppercase tracking-wider mb-1">Long Break</span>
+                        <span className="font-medium text-gray-900">{technique.settings.longBreakDuration}m</span>
                       </div>
                     </div>
                   )}
                   
                   {technique.type === 'active-recall' && (
                     <div className="text-sm">
-                      <span className="text-gray-600">Prompt every:</span>
-                      <span className="font-medium ml-1">{technique.settings.promptFrequency} minutes</span>
+                      <span className="text-gray-600">Prompt frequency: </span>
+                      <span className="font-medium text-gray-900">Every {technique.settings.promptFrequency} minutes</span>
                     </div>
                   )}
                   
                   {technique.type === 'spaced-repetition' && (
                     <div className="text-sm">
-                      <span className="text-gray-600">Initial interval:</span>
-                      <span className="font-medium ml-1">{technique.settings.initialInterval} day(s)</span>
+                      <span className="text-gray-600">Initial review interval: </span>
+                      <span className="font-medium text-gray-900">{technique.settings.initialInterval} day(s)</span>
                     </div>
                   )}
                 </div>
@@ -171,68 +200,68 @@ export const StudyTechniquesPanel: React.FC<StudyTechniquesPanelProps> = ({
 
       {/* Technique Detail Modal */}
       {selectedTechnique && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+        <div 
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+          onClick={() => setSelectedTechnique(null)}
+        >
+          <div 
+            className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900">{selectedTechnique.name}</h3>
+              <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                {(() => {
+                  const Icon = getTechniqueIcon(selectedTechnique.type);
+                  const themeClasses = getThemeClasses(selectedTechnique.type);
+                  return <Icon className={`w-6 h-6 mr-2 ${themeClasses.textIcon}`} />;
+                })()}
+                {selectedTechnique.name}
+              </h3>
               <button
                 onClick={() => setSelectedTechnique(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 rounded-lg transition-colors"
+                aria-label="Close modal"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-gray-600 mb-6">{selectedTechnique.description}</p>
+            <p className="text-gray-600 mb-6 text-base leading-relaxed">{selectedTechnique.description}</p>
 
-            {/* Technique-specific settings */}
-            <div className="space-y-4">
+            {/* Technique-specific settings guide */}
+            <div className="space-y-4 bg-gray-50 rounded-xl p-5 border border-gray-100">
+              <h4 className="font-semibold text-gray-900 mb-3">How it works</h4>
+              
               {selectedTechnique.type === 'pomodoro' && (
-                <>
-                  <h4 className="font-medium text-gray-900">How it works:</h4>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    <li>• Work in focused {selectedTechnique.settings.workDuration}-minute intervals</li>
-                    <li>• Take {selectedTechnique.settings.shortBreakDuration}-minute breaks between sessions</li>
-                    <li>• After {selectedTechnique.settings.sessionsUntilLongBreak} sessions, take a {selectedTechnique.settings.longBreakDuration}-minute break</li>
-                    <li>• Repeat the cycle throughout your study session</li>
-                  </ul>
-                </>
+                <ul className="space-y-3 text-sm text-gray-700">
+                  <li className="flex items-start"><span className="text-red-500 mr-2 font-bold">•</span> Work in focused {selectedTechnique.settings.workDuration}-minute intervals</li>
+                  <li className="flex items-start"><span className="text-red-500 mr-2 font-bold">•</span> Take {selectedTechnique.settings.shortBreakDuration}-minute breaks between sessions</li>
+                  <li className="flex items-start"><span className="text-red-500 mr-2 font-bold">•</span> After {selectedTechnique.settings.sessionsUntilLongBreak} sessions, take a longer {selectedTechnique.settings.longBreakDuration}-minute break</li>
+                </ul>
               )}
 
               {selectedTechnique.type === 'active-recall' && (
-                <>
-                  <h4 className="font-medium text-gray-900">How it works:</h4>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    <li>• Every {selectedTechnique.settings.promptFrequency} minutes, you'll get a recall prompt</li>
-                    <li>• Test yourself on what you just learned</li>
-                    <li>• Rate your understanding to track progress</li>
-                    <li>• Focus on areas where recall is difficult</li>
-                  </ul>
-                </>
+                <ul className="space-y-3 text-sm text-gray-700">
+                  <li className="flex items-start"><span className="text-green-500 mr-2 font-bold">•</span> Receive a recall prompt every {selectedTechnique.settings.promptFrequency} minutes</li>
+                  <li className="flex items-start"><span className="text-green-500 mr-2 font-bold">•</span> Test yourself without looking at source material</li>
+                  <li className="flex items-start"><span className="text-green-500 mr-2 font-bold">•</span> Rate your understanding to track retention</li>
+                </ul>
               )}
 
               {selectedTechnique.type === 'spaced-repetition' && (
-                <>
-                  <h4 className="font-medium text-gray-900">How it works:</h4>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    <li>• Review material at increasing intervals</li>
-                    <li>• Start with {selectedTechnique.settings.initialInterval}-day intervals</li>
-                    <li>• Intervals increase based on how well you remember</li>
-                    <li>• Difficult material is reviewed more frequently</li>
-                  </ul>
-                </>
+                <ul className="space-y-3 text-sm text-gray-700">
+                  <li className="flex items-start"><span className="text-blue-500 mr-2 font-bold">•</span> Review material at mathematically increasing intervals</li>
+                  <li className="flex items-start"><span className="text-blue-500 mr-2 font-bold">•</span> Start with an initial {selectedTechnique.settings.initialInterval}-day gap</li>
+                  <li className="flex items-start"><span className="text-blue-500 mr-2 font-bold">•</span> Difficult material is surfaced more frequently automatically</li>
+                </ul>
               )}
 
               {selectedTechnique.type === 'feynman' && (
-                <>
-                  <h4 className="font-medium text-gray-900">How it works:</h4>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    <li>• Explain concepts in simple terms</li>
-                    <li>• Identify gaps in your understanding</li>
-                    <li>• Go back to source material for unclear areas</li>
-                    <li>• Simplify and use analogies</li>
-                  </ul>
-                </>
+                <ul className="space-y-3 text-sm text-gray-700">
+                  <li className="flex items-start"><span className="text-purple-500 mr-2 font-bold">•</span> Explain concepts in simple, foundational terms</li>
+                  <li className="flex items-start"><span className="text-purple-500 mr-2 font-bold">•</span> Immediately identify gaps in your understanding</li>
+                  <li className="flex items-start"><span className="text-purple-500 mr-2 font-bold">•</span> Return to source material only for unclear areas</li>
+                </ul>
               )}
             </div>
 
@@ -244,17 +273,11 @@ export const StudyTechniquesPanel: React.FC<StudyTechniquesPanelProps> = ({
                 }}
                 className={`flex-1 py-3 px-4 rounded-xl font-medium transition-colors ${
                   selectedTechnique.isActive
-                    ? 'bg-red-600 text-white hover:bg-red-700'
-                    : 'bg-green-600 text-white hover:bg-green-700'
+                    ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200'
+                    : 'bg-gray-900 text-white hover:bg-gray-800'
                 }`}
               >
-                {selectedTechnique.isActive ? 'Deactivate' : 'Activate'}
-              </button>
-              <button
-                onClick={() => setSelectedTechnique(null)}
-                className="flex-1 py-3 px-4 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors"
-              >
-                Close
+                {selectedTechnique.isActive ? 'Deactivate Technique' : 'Activate Technique'}
               </button>
             </div>
           </div>
