@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, BookOpen, Clock, Check } from 'lucide-react';
 import { Module } from '../utils/types';
 import { MODULE_COLORS } from '../utils/constants';
@@ -14,6 +14,11 @@ export const ModuleEntry: React.FC<ModuleEntryProps> = ({
 }) => {
   const [modules, setModules] = useState<Module[]>(existingModules);
   const [newModule, setNewModule] = useState({ code: '', name: '', hours: 2 });
+
+  // Sync local state if parent prop updates after initial mount
+  useEffect(() => {
+    setModules(existingModules);
+  }, [existingModules]);
 
   const addModule = () => {
     if (newModule.code.trim() && newModule.name.trim()) {
@@ -66,10 +71,12 @@ export const ModuleEntry: React.FC<ModuleEntryProps> = ({
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                {/* A11y linkage */}
+                <label htmlFor="module-code" className="block text-sm font-medium text-gray-700 mb-2">
                   Module Code
                 </label>
                 <input
+                  id="module-code"
                   type="text"
                   value={newModule.code}
                   onChange={(e) => setNewModule({ ...newModule, code: e.target.value })}
@@ -79,10 +86,11 @@ export const ModuleEntry: React.FC<ModuleEntryProps> = ({
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="module-name" className="block text-sm font-medium text-gray-700 mb-2">
                   Module Name
                 </label>
                 <input
+                  id="module-name"
                   type="text"
                   value={newModule.name}
                   onChange={(e) => setNewModule({ ...newModule, name: e.target.value })}
@@ -93,10 +101,11 @@ export const ModuleEntry: React.FC<ModuleEntryProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="preferred-hours" className="block text-sm font-medium text-gray-700 mb-2">
                 Preferred Weekly Hours: {newModule.hours}h
               </label>
               <input
+                id="preferred-hours"
                 type="range"
                 min="1"
                 max="10"
@@ -156,6 +165,7 @@ export const ModuleEntry: React.FC<ModuleEntryProps> = ({
                         value={module.preferredHours}
                         onChange={(e) => updateModuleHours(module.id, parseInt(e.target.value) || 1)}
                         className="w-12 text-center border border-gray-300 rounded px-1 py-0.5"
+                        aria-label={`Preferred hours for ${module.code}`}
                       />
                       <span className="ml-1">h/week</span>
                     </div>
@@ -163,6 +173,7 @@ export const ModuleEntry: React.FC<ModuleEntryProps> = ({
                     <button
                       onClick={() => removeModule(module.id)}
                       className="text-red-500 hover:text-red-700 transition-colors"
+                      aria-label={`Remove ${module.code}`}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
