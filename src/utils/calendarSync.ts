@@ -1,33 +1,56 @@
 import { CalendarIntegration, CalendarEvent, CalendarConflict, StudySession, Module } from './types';
 
+// Temporarily extend Window to satisfy TypeScript without a global declaration file
+declare global {
+  interface Window {
+    gapi: any;
+    Msal: any;
+  }
+}
+
 export class CalendarSyncManager {
   private static readonly GOOGLE_CLIENT_ID = 'your-google-client-id';
   private static readonly MICROSOFT_CLIENT_ID = 'your-microsoft-client-id';
+  private static scriptLoadPromises: Record<string, Promise<void>> = {}; // Prevent duplicate script injection
 
-  // Initialize calendar providers
   static async initializeProviders(): Promise<void> {
-    // Load Google Calendar API
-    if (typeof window !== 'undefined' && !window.gapi) {
-      await this.loadScript('https://apis.google.com/js/api.js');
-      await new Promise((resolve) => {
-        window.gapi.load('auth2:client', resolve);
-      });
+    const isBrowser = typeof window !== 'undefined';
+    if (!isBrowser) return;
+
+    const loaders: Promise<void>[] = [];
+
+    if (!window.gapi) {
+      loaders.push(
+        this.loadScript('https://apis.google.com/js/api.js')
+          .then(() => new Promise<void>((resolve) => window.gapi.load('auth2:client', resolve)))
+      );
     }
 
-    // Load Microsoft Graph API
-    if (typeof window !== 'undefined' && !window.Msal) {
-      await this.loadScript('https://alcdn.msauth.net/browser/2.14.2/js/msal-browser.min.js');
+    if (!window.Msal) {
+      loaders.push(this.loadScript('https://alcdn.msauth.net/browser/2.14.2/js/msal-browser.min.js'));
     }
+
+    await Promise.all(loaders);
   }
 
   private static loadScript(src: string): Promise<void> {
-    return new Promise((resolve, reject) => {
+    // Memoize the promise to prevent injecting the script twice if called concurrently
+    if (this.scriptLoadPromises[src]) {
+      return this.scriptLoadPromises[src];
+    }
+
+    this.scriptLoadPromises[src] = new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.src = src;
       script.onload = () => resolve();
-      script.onerror = reject;
+      script.onerror = (err) => {
+        delete this.scriptLoadPromises[src]; // Cleanup on fail
+        reject(err);
+      };
       document.head.appendChild(script);
     });
+
+    return this.scriptLoadPromises[src];
   }
 
   // Google Calendar Integration
@@ -46,7 +69,7 @@ export class CalendarSyncManager {
       const profile = user.getBasicProfile();
       const authResponse = user.getAuthResponse();
 
-      const integration: CalendarIntegration = {
+      return {
         id: `google_${Date.now()}`,
         provider: 'google',
         name: 'Google Calendar',
@@ -65,8 +88,6 @@ export class CalendarSyncManager {
           conflictResolution: 'notify'
         }
       };
-
-      return integration;
     } catch (error) {
       console.error('Google Calendar connection failed:', error);
       return null;
@@ -87,14 +108,11 @@ export class CalendarSyncManager {
       };
 
       const msalInstance = new window.Msal.PublicClientApplication(msalConfig);
-      
-      const loginRequest = {
+      const response = await msalInstance.loginPopup({
         scopes: ['https://graph.microsoft.com/calendars.readwrite']
-      };
-
-      const response = await msalInstance.loginPopup(loginRequest);
+      });
       
-      const integration: CalendarIntegration = {
+      return {
         id: `outlook_${Date.now()}`,
         provider: 'outlook',
         name: 'Outlook Calendar',
@@ -113,15 +131,12 @@ export class CalendarSyncManager {
           conflictResolution: 'notify'
         }
       };
-
-      return integration;
     } catch (error) {
       console.error('Outlook Calendar connection failed:', error);
       return null;
     }
   }
 
-  // Create calendar event from study session
   static async createCalendarEvent(
     integration: CalendarIntegration,
     session: StudySession,
@@ -152,10 +167,7 @@ export class CalendarSyncManager {
     }
   }
 
-  private static async createGoogleEvent(
-    integration: CalendarIntegration,
-    event: CalendarEvent
-  ): Promise<boolean> {
+  private static async createGoogleEvent(integration: CalendarIntegration, event: CalendarEvent): Promise<boolean> {
     try {
       const response = await window.gapi.client.calendar.events.insert({
         calendarId: 'primary',
@@ -180,7 +192,6 @@ export class CalendarSyncManager {
           colorId: this.getGoogleColorId(event.color)
         }
       });
-
       return response.status === 200;
     } catch (error) {
       console.error('Google Calendar event creation failed:', error);
@@ -188,10 +199,7 @@ export class CalendarSyncManager {
     }
   }
 
-  private static async createOutlookEvent(
-    integration: CalendarIntegration,
-    event: CalendarEvent
-  ): Promise<boolean> {
+  private static async createOutlookEvent(integration: CalendarIntegration, event: CalendarEvent): Promise<boolean> {
     try {
       const response = await fetch('https://graph.microsoft.com/v1.0/me/events', {
         method: 'POST',
@@ -216,7 +224,6 @@ export class CalendarSyncManager {
           reminderMinutesBeforeStart: event.reminders?.[0] || 10
         })
       });
-
       return response.ok;
     } catch (error) {
       console.error('Outlook Calendar event creation failed:', error);
@@ -224,7 +231,6 @@ export class CalendarSyncManager {
     }
   }
 
-  // Sync study sessions to calendar
   static async syncStudySessions(
     integration: CalendarIntegration,
     sessions: StudySession[],
@@ -238,30 +244,27 @@ export class CalendarSyncManager {
         const module = modules.find(m => m.id === session.moduleId);
         if (module) {
           const created = await this.createCalendarEvent(integration, session, module);
-          if (created) {
-            success++;
-          } else {
-            failed++;
-          }
+          if (created) success++;
+          else failed++;
         }
       }
     }
 
-    // Update last sync time
     integration.lastSync = new Date().toISOString();
-
     return { success, failed };
   }
 
-  // Check for calendar conflicts
   static async checkConflicts(
     integration: CalendarIntegration,
     sessions: StudySession[]
   ): Promise<CalendarConflict[]> {
     const conflicts: CalendarConflict[] = [];
+    
+    // Guard against empty array throwing Invalid Date Range errors
+    if (!sessions || sessions.length === 0) return conflicts;
 
     try {
-      const events = await this.getCalendarEvents(integration, sessions[0]?.date, sessions[sessions.length - 1]?.date);
+      const events = await this.getCalendarEvents(integration, sessions[0].date, sessions[sessions.length - 1].date);
       
       for (const session of sessions) {
         const sessionStart = new Date(this.convertToCalendarTime(session.date, session.startTime));
@@ -270,7 +273,6 @@ export class CalendarSyncManager {
         const conflictingEvent = events.find(event => {
           const eventStart = new Date(event.startTime);
           const eventEnd = new Date(event.endTime);
-          
           return (sessionStart < eventEnd && sessionEnd > eventStart) && event.source !== 'randstudy';
         });
 
@@ -309,11 +311,7 @@ export class CalendarSyncManager {
     }
   }
 
-  private static async getGoogleEvents(
-    integration: CalendarIntegration,
-    startDate: string,
-    endDate: string
-  ): Promise<CalendarEvent[]> {
+  private static async getGoogleEvents(integration: CalendarIntegration, startDate: string, endDate: string): Promise<CalendarEvent[]> {
     const response = await window.gapi.client.calendar.events.list({
       calendarId: 'primary',
       timeMin: new Date(startDate).toISOString(),
@@ -332,18 +330,10 @@ export class CalendarSyncManager {
     }));
   }
 
-  private static async getOutlookEvents(
-    integration: CalendarIntegration,
-    startDate: string,
-    endDate: string
-  ): Promise<CalendarEvent[]> {
+  private static async getOutlookEvents(integration: CalendarIntegration, startDate: string, endDate: string): Promise<CalendarEvent[]> {
     const response = await fetch(
       `https://graph.microsoft.com/v1.0/me/calendarview?startDateTime=${startDate}&endDateTime=${endDate}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${integration.accessToken}`
-        }
-      }
+      { headers: { 'Authorization': `Bearer ${integration.accessToken}` } }
     );
 
     const data = await response.json();
@@ -357,16 +347,11 @@ export class CalendarSyncManager {
     }));
   }
 
-  private static findAlternativeSlots(
-    originalStart: Date,
-    originalEnd: Date,
-    existingEvents: CalendarEvent[]
-  ): string[] {
+  private static findAlternativeSlots(originalStart: Date, originalEnd: Date, existingEvents: CalendarEvent[]): string[] {
     const alternatives: string[] = [];
     const duration = originalEnd.getTime() - originalStart.getTime();
     
-    // Try slots before and after the original time
-    for (let offset of [-60, -30, 30, 60, 120]) { // minutes
+    for (let offset of [-60, -30, 30, 60, 120]) { 
       const newStart = new Date(originalStart.getTime() + offset * 60000);
       const newEnd = new Date(newStart.getTime() + duration);
       
@@ -380,8 +365,7 @@ export class CalendarSyncManager {
         alternatives.push(newStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       }
     }
-
-    return alternatives.slice(0, 3); // Return top 3 alternatives
+    return alternatives.slice(0, 3);
   }
 
   private static convertToCalendarTime(date: string, time: string): string {
@@ -394,40 +378,28 @@ export class CalendarSyncManager {
 
     const dateTime = new Date(date);
     dateTime.setHours(hour24, minutes, 0, 0);
-    
     return dateTime.toISOString();
   }
 
   private static getGoogleColorId(hexColor?: string): string {
-    // Map hex colors to Google Calendar color IDs
-    const colorMap: { [key: string]: string } = {
-      '#3B82F6': '1', // Blue
-      '#EF4444': '11', // Red
-      '#10B981': '10', // Green
-      '#F59E0B': '5', // Yellow
-      '#8B5CF6': '3', // Purple
-      '#EC4899': '4', // Pink
-      '#06B6D4': '6', // Cyan
-      '#84CC16': '2'  // Lime
+    const colorMap: Record<string, string> = {
+      '#3B82F6': '1', '#EF4444': '11', '#10B981': '10', 
+      '#F59E0B': '5', '#8B5CF6': '3', '#EC4899': '4', 
+      '#06B6D4': '6', '#84CC16': '2'
     };
-    
     return colorMap[hexColor || '#3B82F6'] || '1';
   }
 
-  // Disconnect calendar integration
   static async disconnectCalendar(integration: CalendarIntegration): Promise<boolean> {
     try {
       if (integration.provider === 'google') {
         const authInstance = window.gapi.auth2.getAuthInstance();
         await authInstance.signOut();
-      } else if (integration.provider === 'outlook') {
-        // Microsoft logout would be handled by the MSAL instance
       }
       
       integration.isConnected = false;
       integration.accessToken = undefined;
       integration.refreshToken = undefined;
-      
       return true;
     } catch (error) {
       console.error('Failed to disconnect calendar:', error);
