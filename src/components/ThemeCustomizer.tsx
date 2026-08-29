@@ -63,10 +63,13 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   };
 
   const handleResetToDefault = () => {
-    const defaultTheme = ThemeManager.PREDEFINED_THEMES['modern-light'];
-    setWorkingTheme(defaultTheme);
-    if (previewMode) {
-      ThemeManager.applyTheme(defaultTheme);
+    // FIX: Using a theme that actually exists in the PREDEFINED_THEMES object
+    const defaultTheme = ThemeManager.PREDEFINED_THEMES['ocean-blue'];
+    if (defaultTheme) {
+      setWorkingTheme(defaultTheme);
+      if (previewMode) {
+        ThemeManager.applyTheme(defaultTheme);
+      }
     }
   };
 
@@ -75,7 +78,8 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
     const generatedPalette = ThemeManager.generateColorPalette(randomColor);
     
-    const randomTheme = ThemeManager.createCustomTheme('modern-light', {
+    // FIX: Base the random theme off an existing template
+    const randomTheme = ThemeManager.createCustomTheme('ocean-blue', {
       name: 'Generated Theme',
       colorScheme: {
         ...workingTheme.colorScheme,
@@ -87,10 +91,10 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 shrink-0">
           <div className="flex items-center">
             <Palette className="w-6 h-6 text-purple-600 mr-3" />
             <h2 className="text-2xl font-bold text-gray-900">Theme Customizer</h2>
@@ -109,17 +113,17 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
             </button>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-2xl"
+              className="text-gray-400 hover:text-gray-600 text-2xl hover:bg-gray-100 rounded-lg w-8 h-8 flex items-center justify-center transition-colors"
             >
               ×
             </button>
           </div>
         </div>
 
-        <div className="flex h-[calc(90vh-120px)]">
+        <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
-          <div className="w-64 bg-gray-50 border-r border-gray-200 p-4">
-            <nav className="space-y-2">
+          <div className="w-64 bg-gray-50 border-r border-gray-200 p-4 flex flex-col overflow-y-auto">
+            <nav className="space-y-2 flex-1">
               {[
                 { id: 'presets', label: 'Theme Presets', icon: Sparkles },
                 { id: 'colors', label: 'Colors', icon: Palette },
@@ -142,7 +146,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
             </nav>
 
             {/* Quick Actions */}
-            <div className="mt-8 space-y-2">
+            <div className="mt-8 space-y-2 pt-4 border-t border-gray-200">
               <button
                 onClick={generateRandomTheme}
                 className="w-full flex items-center px-3 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
@@ -185,15 +189,15 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                         />
                         <div className="flex space-x-1">
                           <div 
-                            className="w-4 h-4 rounded-full"
+                            className="w-4 h-4 rounded-full border border-gray-200"
                             style={{ backgroundColor: theme.colorScheme.primary }}
                           />
                           <div 
-                            className="w-4 h-4 rounded-full"
+                            className="w-4 h-4 rounded-full border border-gray-200"
                             style={{ backgroundColor: theme.colorScheme.secondary }}
                           />
                           <div 
-                            className="w-4 h-4 rounded-full"
+                            className="w-4 h-4 rounded-full border border-gray-200"
                             style={{ backgroundColor: theme.colorScheme.accent }}
                           />
                         </div>
@@ -211,7 +215,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                 <h3 className="text-xl font-bold text-gray-900 mb-6">Customize Colors</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {Object.entries(workingTheme.colorScheme).map(([key, value]) => {
-                    if (key === 'gradient') return null;
+                    if (key === 'gradient' || typeof value !== 'string') return null;
                     return (
                       <div key={key} className="space-y-2">
                         <label className="block text-sm font-medium text-gray-700 capitalize">
@@ -228,7 +232,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                             type="text"
                             value={value}
                             onChange={(e) => handleColorChange(key as keyof ColorScheme, e.target.value)}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono uppercase"
                           />
                         </div>
                       </div>
@@ -249,10 +253,10 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                         <button
                           key={density}
                           onClick={() => handleLayoutChange('density', density)}
-                          className={`p-3 rounded-lg border-2 transition-colors capitalize ${
+                          className={`p-3 rounded-lg border-2 transition-colors capitalize font-medium ${
                             workingTheme.layout.density === density
-                              ? 'border-purple-500 bg-purple-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-purple-500 bg-purple-50 text-purple-700'
+                              : 'border-gray-200 hover:border-gray-300 text-gray-700'
                           }`}
                         >
                           {density}
@@ -268,10 +272,10 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                         <button
                           key={radius}
                           onClick={() => handleLayoutChange('borderRadius', radius)}
-                          className={`p-3 border-2 transition-colors capitalize ${
+                          className={`p-3 border-2 transition-colors capitalize font-medium ${
                             workingTheme.layout.borderRadius === radius
-                              ? 'border-purple-500 bg-purple-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-purple-500 bg-purple-50 text-purple-700'
+                              : 'border-gray-200 hover:border-gray-300 text-gray-700'
                           } ${
                             radius === 'sharp' ? 'rounded-none' :
                             radius === 'rounded' ? 'rounded-lg' : 'rounded-2xl'
@@ -290,10 +294,10 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                         <button
                           key={shadow}
                           onClick={() => handleLayoutChange('shadows', shadow)}
-                          className={`p-3 rounded-lg border-2 transition-colors capitalize ${
+                          className={`p-3 rounded-lg border-2 transition-colors capitalize font-medium ${
                             workingTheme.layout.shadows === shadow
-                              ? 'border-purple-500 bg-purple-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-purple-500 bg-purple-50 text-purple-700'
+                              : 'border-gray-200 hover:border-gray-300 text-gray-700'
                           } ${
                             shadow === 'none' ? '' :
                             shadow === 'subtle' ? 'shadow-sm' : 'shadow-lg'
@@ -312,10 +316,10 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                         <button
                           key={animation}
                           onClick={() => handleLayoutChange('animations', animation)}
-                          className={`p-3 rounded-lg border-2 transition-colors capitalize ${
+                          className={`p-3 rounded-lg border-2 transition-colors capitalize font-medium ${
                             workingTheme.layout.animations === animation
-                              ? 'border-purple-500 bg-purple-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-purple-500 bg-purple-50 text-purple-700'
+                              : 'border-gray-200 hover:border-gray-300 text-gray-700'
                           }`}
                         >
                           {animation}
@@ -365,10 +369,10 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                               fontSize: size
                             }
                           })}
-                          className={`p-3 rounded-lg border-2 transition-colors capitalize ${
+                          className={`p-3 rounded-lg border-2 transition-colors capitalize font-medium ${
                             workingTheme.customizations.fontSize === size
-                              ? 'border-purple-500 bg-purple-50'
-                              : 'border-gray-200 hover:border-gray-300'
+                              ? 'border-purple-500 bg-purple-50 text-purple-700'
+                              : 'border-gray-200 hover:border-gray-300 text-gray-700'
                           }`}
                         >
                           {size}
@@ -397,27 +401,27 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50 shrink-0">
           <div className="flex items-center space-x-3">
-            <button className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-800 transition-colors">
-              <Upload className="w-4 h-4 mr-2" />
-              Import Theme
+            <button className="flex items-center px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+              <Upload className="w-4 h-4 mr-2 text-gray-500" />
+              Import
             </button>
-            <button className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-800 transition-colors">
-              <Download className="w-4 h-4 mr-2" />
-              Export Theme
+            <button className="flex items-center px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+              <Download className="w-4 h-4 mr-2 text-gray-500" />
+              Export
             </button>
           </div>
           <div className="flex items-center space-x-3">
             <button
               onClick={onClose}
-              className="px-6 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+              className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
             >
               Cancel
             </button>
             <button
               onClick={handleApplyTheme}
-              className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-sm"
             >
               Apply Theme
             </button>
