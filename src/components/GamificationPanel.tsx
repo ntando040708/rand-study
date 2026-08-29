@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Trophy, Star, Target, Zap, Crown, Gift } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Trophy, Star, Target, Zap, Crown, Gift, Flame, Heart, BookOpen, Clock, Play } from 'lucide-react';
 import { User, Challenge, Achievement } from '../utils/types';
 import { GamificationEngine } from '../utils/gamification';
 
@@ -9,6 +9,19 @@ interface GamificationPanelProps {
   achievements: Achievement[];
   onUpdateChallenges: (challenges: Challenge[]) => void;
 }
+
+// Statically map icon strings to imported components to prevent Vite build crashes
+const ICON_MAP: Record<string, React.ElementType> = {
+  Trophy,
+  Star,
+  Target,
+  Crown,
+  Flame,
+  Heart,
+  BookOpen,
+  Clock,
+  Play
+};
 
 export const GamificationPanel: React.FC<GamificationPanelProps> = ({
   user,
@@ -30,9 +43,9 @@ export const GamificationPanel: React.FC<GamificationPanelProps> = ({
     setXPToNextLevel(xpNeeded);
   }, [user]);
 
-  const activeChallenges = challenges.filter(c => !c.completed);
-  const completedChallenges = challenges.filter(c => c.completed);
-  const recentAchievements = achievements.slice(-3);
+  const activeChallenges = useMemo(() => challenges.filter(c => !c.completed), [challenges]);
+  const completedChallenges = useMemo(() => challenges.filter(c => c.completed), [challenges]);
+  const recentAchievements = useMemo(() => achievements.slice(-3), [achievements]);
 
   const getLevelIcon = (level: number) => {
     if (level >= 50) return Crown;
@@ -42,6 +55,10 @@ export const GamificationPanel: React.FC<GamificationPanelProps> = ({
   };
 
   const LevelIcon = getLevelIcon(currentLevel);
+  
+  // Safe calculation preventing division by zero
+  const safeLevel = Math.max(1, currentLevel);
+  const progressPercentage = Math.max(10, 100 - (xpToNextLevel / (Math.pow(safeLevel, 2) * 100)) * 100);
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -74,9 +91,7 @@ export const GamificationPanel: React.FC<GamificationPanelProps> = ({
         <div className="w-full bg-gray-200 rounded-full h-3">
           <div
             className="bg-gradient-to-r from-yellow-400 to-yellow-600 h-3 rounded-full transition-all duration-500"
-            style={{ 
-              width: `${Math.max(10, 100 - (xpToNextLevel / (Math.pow(currentLevel, 2) * 100)) * 100)}%` 
-            }}
+            style={{ width: `${progressPercentage}%` }}
           />
         </div>
       </div>
@@ -90,7 +105,7 @@ export const GamificationPanel: React.FC<GamificationPanelProps> = ({
           </h4>
           <div className="space-y-2">
             {recentAchievements.map((achievement) => {
-              const IconComponent = require('lucide-react')[achievement.icon] || Trophy;
+              const IconComponent = ICON_MAP[achievement.icon] || Trophy;
               return (
                 <div
                   key={achievement.id}
@@ -122,7 +137,7 @@ export const GamificationPanel: React.FC<GamificationPanelProps> = ({
           </h4>
           <div className="space-y-3">
             {activeChallenges.slice(0, 3).map((challenge) => {
-              const progress = Math.min((challenge.progress / challenge.target) * 100, 100);
+              const challengeProgress = Math.min((challenge.progress / challenge.target) * 100, 100);
               const isDaily = challenge.type === 'daily';
               const isWeekly = challenge.type === 'weekly';
               
@@ -147,12 +162,12 @@ export const GamificationPanel: React.FC<GamificationPanelProps> = ({
                       <span className="text-gray-600">
                         {challenge.progress}/{challenge.target}
                       </span>
-                      <span className="text-gray-600">{Math.round(progress)}%</span>
+                      <span className="text-gray-600">{Math.round(challengeProgress)}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${progress}%` }}
+                        style={{ width: `${challengeProgress}%` }}
                       />
                     </div>
                   </div>
