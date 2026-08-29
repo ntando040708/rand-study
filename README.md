@@ -35,5 +35,5 @@ Ensure you have Node.js (v18 or higher) and npm installed on your machine.
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/your-username/rand-study.git](https://github.com/your-username/rand-study.git)
+   git clone [https://github.com/ntando040708/rand-study.git](https://github.com/ntando040708/rand-study.git)
    cd rand-study
